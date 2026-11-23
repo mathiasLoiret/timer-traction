@@ -3,171 +3,483 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Timer de pause</title>
+<title>Timer traction</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
+  /* ===== Thème : sombre « salle de sport » ===== */
   :root {
-    --bg: #f4f5f7;
-    --card: #ffffff;
-    --text: #1d2330;
-    --muted: #6b7385;
-    --border: #dde1e8;
-    --accent: #2f6fed;
-    --accent-text: #ffffff;
-    --go: #1f9d55;
-    --rest: #e07b1a;
-    --danger: #c93b3b;
-    --track: #e6e9ef;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #12151b;
-      --card: #1b1f27;
-      --text: #e8ebf1;
-      --muted: #949cad;
-      --border: #2c323d;
-      --accent: #5b8cff;
-      --accent-text: #0d1117;
-      --go: #3ccf7a;
-      --rest: #f39a42;
-      --danger: #ef6b6b;
-      --track: #2a303b;
-    }
+    color-scheme: dark;
+    --bg: #0a0d13;
+    --card: #131824;
+    --card-2: #1a2030;
+    --border: #252d3d;
+    --text: #eef1f7;
+    --muted: #8a93a8;
+    --faint: #5b6377;
+    --go: #3dff8a;          /* action / GO */
+    --go-ink: #04140a;      /* texte sur fond vert */
+    --rest: #ff9f1c;        /* récupération */
+    --danger: #ff4d5e;      /* 10 dernières secondes */
+    --gold: #ffc83d;        /* records / badges */
+    --gold-ink: #1d1400;
+    --blue: #5b8cff;
+    --track: #222a3a;
+    --radius: 16px;
+    --display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", system-ui, sans-serif;
   }
   * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
   body {
     margin: 0;
-    background: var(--bg);
+    min-height: 100vh;
+    background:
+      radial-gradient(1200px 500px at 50% -200px, rgba(61, 255, 138, .07), transparent 70%),
+      var(--bg);
     color: var(--text);
     font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   }
-  main { max-width: 760px; margin: 0 auto; padding: 24px 16px 48px; }
-  h1 { font-size: 1.4rem; margin: 0 0 16px; }
-  h2 { font-size: 1.05rem; margin: 0 0 12px; }
+  main { max-width: 880px; margin: 0 auto; padding: 28px 16px 64px; }
+  h1, h2, h3 { font-family: var(--display); font-weight: 700; letter-spacing: .01em; margin: 0; }
+  .kicker {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: .95rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
   .card {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 18px;
+    border-radius: var(--radius);
+    padding: 20px;
     margin-bottom: 16px;
   }
-  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; }
+  .section-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; gap: 12px; }
+  .section-head h2 { font-size: 1.4rem; }
+  .section-head small { color: var(--muted); }
+
+  /* ===== Boutons ===== */
+  button {
+    font: inherit;
+    color: var(--text);
+    background: var(--card-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 9px 16px;
+    cursor: pointer;
+    transition: transform .08s ease, border-color .15s, background .15s, box-shadow .15s;
+  }
+  button:hover { border-color: var(--faint); }
+  button:active { transform: scale(.97); }
+  button:focus-visible, summary:focus-visible, input:focus-visible {
+    outline: 3px solid var(--blue);
+    outline-offset: 2px;
+  }
+  button:disabled { opacity: .4; cursor: default; }
+  .btn-go {
+    background: var(--go);
+    color: var(--go-ink);
+    border-color: var(--go);
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 1.6rem;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    padding: 14px 34px;
+    box-shadow: 0 0 0 0 rgba(61, 255, 138, .0), 0 8px 30px rgba(61, 255, 138, .25);
+  }
+  .btn-go:hover { box-shadow: 0 8px 40px rgba(61, 255, 138, .4); border-color: var(--go); }
+  .btn-skip {
+    background: transparent;
+    color: var(--rest);
+    border: 2px solid var(--rest);
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 1.4rem;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    padding: 12px 30px;
+  }
+  .btn-skip:hover { background: rgba(255, 159, 28, .1); border-color: var(--rest); }
+  .btn-ghost { background: transparent; }
+  .btn-link { background: none; border: none; color: var(--muted); padding: 6px 8px; }
+  .btn-link:hover { color: var(--text); }
+  .btn-danger { color: var(--danger); background: transparent; }
+
+  /* ===== Accueil ===== */
+  .hero { display: flex; justify-content: space-between; align-items: end; gap: 16px; margin-bottom: 22px; flex-wrap: wrap; }
+  .brand { font-family: var(--display); font-weight: 800; letter-spacing: .18em; font-size: .95rem; color: var(--go); }
+  .hero h1 { font-size: clamp(2.4rem, 6vw, 3.4rem); line-height: 1; margin-top: 6px; }
+
+  .streak {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 18px 22px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: linear-gradient(100deg, rgba(255, 159, 28, .16), rgba(255, 77, 94, .06) 60%, transparent), var(--card);
+    margin-bottom: 16px;
+  }
+  .streak .flame { font-size: 2.6rem; line-height: 1; filter: drop-shadow(0 0 12px rgba(255, 159, 28, .5)); }
+  .streak.cold .flame { filter: grayscale(1) opacity(.5); }
+  .streak b { font-family: var(--display); font-size: 2.4rem; line-height: 1; color: var(--rest); }
+  .streak.cold b { color: var(--muted); }
+  .streak .label { font-family: var(--display); font-size: 1.3rem; font-weight: 700; }
+  .streak p { margin: 2px 0 0; color: var(--muted); font-size: .92rem; }
+
+  .mini { grid-column: 1; display: flex; flex-wrap: wrap; gap: 8px 26px; margin-top: 10px; }
+  .mini div b { display: block; font-family: var(--display); font-size: 1.7rem; line-height: 1.05; font-variant-numeric: tabular-nums; }
+  .mini div span { color: var(--muted); font-size: .8rem; }
+  .mini div.gold b { color: var(--gold); }
+
+  .ex-list { display: grid; gap: 14px; margin-bottom: 16px; }
+  .ex-card {
+    position: relative;
+    overflow: hidden;
+    text-align: left;
+    padding: 26px 28px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background:
+      linear-gradient(120deg, rgba(61, 255, 138, .14), transparent 55%),
+      var(--card);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 6px 20px;
+  }
+  .ex-card:hover { border-color: var(--go); box-shadow: 0 10px 40px rgba(61, 255, 138, .12); }
+  .ex-card .name { font-family: var(--display); font-weight: 800; font-size: 2.6rem; line-height: 1; text-transform: uppercase; letter-spacing: .02em; }
+  .ex-card .meta { color: var(--muted); font-size: .95rem; grid-column: 1; }
+  .ex-card .last { color: var(--text); font-size: .95rem; grid-column: 1; }
+  .ex-card .cta {
+    grid-column: 2; grid-row: 1 / span 4;
+    background: var(--go); color: var(--go-ink);
+    font-family: var(--display); font-weight: 800; font-size: 1.4rem; text-transform: uppercase; letter-spacing: .04em;
+    padding: 12px 22px; border-radius: 12px;
+    white-space: nowrap;
+  }
+  @media (max-width: 560px) { .ex-card { grid-template-columns: 1fr; } .ex-card .cta { grid-column: 1; grid-row: auto; justify-self: start; margin-top: 8px; } }
+
+  .badges { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+  .badge {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px 10px;
+    text-align: center;
+    background: var(--card-2);
+  }
+  .badge .ic { font-size: 1.9rem; line-height: 1.2; display: block; }
+  .badge b { display: block; font-family: var(--display); font-size: 1.05rem; letter-spacing: .02em; }
+  .badge small { color: var(--muted); font-size: .78rem; line-height: 1.3; display: block; }
+  .badge.on { border-color: rgba(255, 200, 61, .45); background: linear-gradient(180deg, rgba(255, 200, 61, .12), transparent), var(--card-2); }
+  .badge.off .ic { filter: grayscale(1); opacity: .3; }
+  .badge.off b { color: var(--faint); }
+
+  table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--border); }
+  tr:last-child td { border-bottom: none; }
+  th { color: var(--muted); font-weight: 500; font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  td.star { color: var(--gold); width: 1.4em; }
+  .empty { color: var(--muted); font-size: .92rem; margin: 0; }
+
+  /* ===== Page exercice ===== */
+  .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+  .topbar h1 { font-size: 1.8rem; text-transform: uppercase; letter-spacing: .04em; }
+
+  details.settings { margin-bottom: 16px; }
+  details.settings summary {
+    cursor: pointer;
+    list-style: none;
+    color: var(--muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 10px;
+  }
+  details.settings summary::-webkit-details-marker { display: none; }
+  details.settings summary:hover { color: var(--text); }
+  details.settings[open] summary { color: var(--text); }
+  .settings .row { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 10px; padding: 16px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); }
   label { display: flex; flex-direction: column; font-size: .8rem; color: var(--muted); gap: 4px; }
-  input, select {
+  input {
     font: inherit;
     color: var(--text);
     background: var(--bg);
     border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 7px 10px;
+    border-radius: 10px;
+    padding: 8px 10px;
+    width: 110px;
   }
-  input[type=number] { width: 90px; }
-  input[type=text] { width: 180px; }
-  button {
-    font: inherit;
-    border: 1px solid var(--border);
-    background: var(--card);
-    color: var(--text);
-    border-radius: 8px;
-    padding: 8px 14px;
-    cursor: pointer;
-  }
-  button:hover { border-color: var(--muted); }
-  button.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); font-weight: 600; }
-  button.danger { color: var(--danger); }
-  button:disabled { opacity: .45; cursor: default; }
 
-  .session { text-align: center; }
-  .set-label { font-size: 1.1rem; color: var(--muted); margin: 0; }
-  .reps { font-size: 2rem; font-weight: 700; margin: 4px 0 8px; }
-  .status { font-weight: 600; letter-spacing: .04em; text-transform: uppercase; font-size: .85rem; }
-  .status.go { color: var(--go); }
-  .status.rest { color: var(--rest); }
-  .clock {
-    font-size: clamp(4rem, 18vw, 8rem);
-    font-weight: 700;
+  .session { text-align: center; padding: 26px 20px 22px; }
+
+  /* Scène centrale : GO ou anneau de récup */
+  .stage { min-height: 330px; display: grid; place-items: center; }
+  .go-panel .num {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: clamp(7rem, 22vw, 11rem);
+    line-height: .9;
+    color: var(--go);
+    text-shadow: 0 0 40px rgba(61, 255, 138, .45);
+    animation: glow 2.4s ease-in-out infinite;
     font-variant-numeric: tabular-nums;
-    line-height: 1.1;
-    margin: 6px 0 12px;
   }
-  .clock.go { color: var(--go); }
-  .bar { height: 10px; background: var(--track); border-radius: 99px; overflow: hidden; margin: 0 auto 18px; max-width: 520px; }
-  .bar > div { height: 100%; width: 0; background: var(--rest); transition: width .2s linear; }
-  .big { font-size: 1.25rem; padding: 14px 28px; }
-  .controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 12px; }
-  .hint { color: var(--muted); font-size: .85rem; margin-top: 10px; }
-  .done-list { color: var(--muted); font-size: .9rem; margin-top: 14px; }
+  .go-panel .unit { font-family: var(--display); font-weight: 700; font-size: 1.8rem; text-transform: uppercase; letter-spacing: .06em; }
+  .go-panel .kicker { color: var(--go); }
+  @keyframes glow {
+    0%, 100% { text-shadow: 0 0 30px rgba(61, 255, 138, .35); }
+    50% { text-shadow: 0 0 60px rgba(61, 255, 138, .7); }
+  }
 
-  .summary { display: none; }
-  .summary.show { display: block; }
-  .stats { display: flex; flex-wrap: wrap; gap: 24px; justify-content: center; margin: 8px 0 14px; }
-  .stat b { display: block; font-size: 1.8rem; font-variant-numeric: tabular-nums; }
-  .stat span { color: var(--muted); font-size: .85rem; }
+  .ring { position: relative; width: 300px; height: 300px; }
+  .ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .ring circle { fill: none; stroke-width: 12; }
+  .ring .bg { stroke: var(--track); }
+  .ring .fg { stroke: var(--rest); stroke-linecap: round; transition: stroke-dashoffset .25s linear, stroke .3s; filter: drop-shadow(0 0 8px rgba(255, 159, 28, .5)); }
+  .ring .center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .ring .time { font-family: var(--display); font-weight: 800; font-size: 5.2rem; line-height: 1; font-variant-numeric: tabular-nums; color: var(--rest); transition: color .3s; }
+  .ring .kicker { color: var(--rest); }
+  .ring .next { color: var(--muted); font-size: .95rem; margin-top: 6px; }
+  .stage.danger .ring .fg { stroke: var(--danger); filter: drop-shadow(0 0 10px rgba(255, 77, 94, .6)); }
+  .stage.danger .ring .time, .stage.danger .ring .kicker { color: var(--danger); }
+  .stage.danger .ring .time { animation: beat 1s ease-in-out infinite; }
+  /* Préparation (exercice chronométré) : bleu */
+  .stage[data-phase="prep"] .ring .fg { stroke: var(--blue); filter: drop-shadow(0 0 10px rgba(91, 140, 255, .6)); }
+  .stage[data-phase="prep"] .ring .time, .stage[data-phase="prep"] .ring .kicker { color: var(--blue); }
+  .stage[data-phase="prep"] .ring .time { font-size: 7rem; animation: beat 1s ease-in-out infinite; }
+  /* Effort chronométré : vert */
+  .stage[data-phase="hold"] .ring .fg { stroke: var(--go); filter: drop-shadow(0 0 10px rgba(61, 255, 138, .6)); }
+  .stage[data-phase="hold"] .ring .time, .stage[data-phase="hold"] .ring .kicker { color: var(--go); }
+  .stage.paused .ring .fg { stroke: var(--faint); filter: none; }
+  .stage.paused .ring .time { color: var(--muted); animation: none; }
+  @keyframes beat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
 
-  table { width: 100%; border-collapse: collapse; font-size: .92rem; }
-  th, td { text-align: left; padding: 6px 4px; border-bottom: 1px solid var(--border); }
-  th { color: var(--muted); font-weight: 500; }
-  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
-  .empty { color: var(--muted); font-size: .9rem; }
-  .head { display: flex; justify-content: space-between; align-items: center; }
+  .coach {
+    min-height: 1.6em;
+    margin: 10px auto 18px;
+    max-width: 520px;
+    font-size: 1.08rem;
+    color: var(--text);
+  }
+  .actions { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 12px; }
+  .rest-controls { display: flex; justify-content: center; gap: 8px; margin-top: 12px; }
+  .hint { color: var(--faint); font-size: .82rem; margin-top: 14px; }
+  kbd { font: inherit; border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 6px; padding: 0 6px; color: var(--muted); }
+
+  /* Escalier de progression */
+  .progress-block {
+    display: flex;
+    align-items: end;
+    gap: 22px;
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+    text-align: left;
+  }
+  .total-box b { display: block; font-family: var(--display); font-weight: 800; font-size: 3.4rem; line-height: 1; font-variant-numeric: tabular-nums; }
+  .total-box span { color: var(--muted); font-size: .9rem; white-space: nowrap; }
+  .stairs { flex: 1; display: flex; align-items: end; gap: 4px; height: 110px; padding-top: 20px; min-width: 0; }
+  .step {
+    position: relative;
+    flex: 1 1 0;
+    max-width: 40px;
+    min-width: 4px;
+    border-radius: 6px 6px 2px 2px;
+    background: linear-gradient(180deg, var(--go), rgba(61, 255, 138, .45));
+    animation: rise .35s ease-out;
+    transform-origin: bottom;
+  }
+  .step span {
+    position: absolute; top: -19px; left: 50%; transform: translateX(-50%);
+    font-family: var(--display); font-weight: 700; font-size: .85rem; color: var(--muted);
+  }
+  .step.top { background: linear-gradient(180deg, var(--gold), rgba(255, 200, 61, .45)); }
+  .step.top span { color: var(--gold); }
+  .step.ghost { background: transparent; border: 2px dashed var(--faint); animation: none; }
+  .stairs.dense .step span { display: none; }
+  .stairs:empty::before { content: "Ta première série va apparaître ici"; color: var(--faint); font-size: .9rem; align-self: center; }
+  @keyframes rise { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+
+  /* Récap */
+  .recap { text-align: center; padding: 30px 22px; }
+  .recap h2 { font-size: clamp(2rem, 5vw, 2.8rem); margin: 6px 0 8px; }
+  .recap .big-total b { font-family: var(--display); font-weight: 800; font-size: clamp(5rem, 16vw, 7.5rem); line-height: 1; color: var(--go); text-shadow: 0 0 40px rgba(61, 255, 138, .35); }
+  .recap .big-total span { display: block; font-family: var(--display); font-size: 1.5rem; text-transform: uppercase; letter-spacing: .06em; }
+  .delta { display: inline-block; margin-top: 10px; padding: 4px 12px; border-radius: 99px; font-weight: 600; font-size: .92rem; background: var(--card-2); color: var(--muted); }
+  .delta.up { color: var(--go); background: rgba(61, 255, 138, .1); }
+  .stats3 { display: flex; justify-content: center; gap: 36px; flex-wrap: wrap; margin: 22px 0 6px; }
+  .stats3 b { display: block; font-family: var(--display); font-size: 2rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .stats3 span { color: var(--muted); font-size: .85rem; }
+  .recap .stairs { max-width: 560px; margin: 18px auto 0; }
+  .ribbons { display: flex; flex-direction: column; gap: 8px; align-items: center; margin-top: 20px; }
+  .ribbon {
+    padding: 8px 18px; border-radius: 12px;
+    background: var(--gold); color: var(--gold-ink);
+    font-family: var(--display); font-weight: 800; font-size: 1.2rem; letter-spacing: .03em; text-transform: uppercase;
+  }
+  .new-badges { margin-top: 20px; }
+  .new-badges .badges { max-width: 560px; margin: 10px auto 0; }
+  .recap .streak-line { margin-top: 18px; font-family: var(--display); font-size: 1.3rem; font-weight: 700; color: var(--rest); }
+  .recap .actions { margin-top: 24px; }
+
+  /* Toast + confettis */
+  .toast {
+    position: fixed; top: 18px; left: 50%;
+    transform: translate(-50%, calc(-100% - 40px));
+    visibility: hidden;
+    background: var(--gold); color: var(--gold-ink);
+    font-family: var(--display); font-weight: 800; font-size: 1.3rem; letter-spacing: .02em;
+    padding: 12px 22px; border-radius: 14px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, .5);
+    transition: transform .35s cubic-bezier(.2, 1.4, .4, 1), visibility 0s linear .35s;
+    z-index: 20;
+    max-width: calc(100vw - 32px);
+    text-align: center;
+  }
+  .toast.show { transform: translate(-50%, 0); visibility: visible; transition: transform .35s cubic-bezier(.2, 1.4, .4, 1); }
+  #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 19; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
 </style>
 </head>
 <body>
 <main>
-  <h1>Timer de pause</h1>
 
-  <section class="card">
-    <h2>Exercice</h2>
-    <div class="row">
-      <label>Exercice actif
-        <select id="exSelect"></select>
-      </label>
-      <button id="addEx">+ Ajouter</button>
-      <button id="delEx" class="danger">Supprimer</button>
-    </div>
-    <div class="row" style="margin-top:12px">
-      <label>Nom <input type="text" id="exName"></label>
-      <label>Reps série 1 <input type="number" id="exStart" min="1" step="1"></label>
-      <label>+ par série <input type="number" id="exInc" min="0" step="1"></label>
-      <label>Pause (s) <input type="number" id="exRest" min="5" step="5"></label>
-    </div>
-  </section>
+  <!-- ===================== ACCUEIL ===================== -->
+  <div id="homeView">
+    <header class="hero">
+      <div>
+        <div class="brand">TIMER TRACTION</div>
+        <h1 id="greet">On grimpe ?</h1>
+      </div>
+    </header>
 
-  <section class="card session" id="sessionCard">
-    <p class="set-label" id="setLabel">Série 1</p>
-    <div class="reps" id="repsLabel">1 répétition</div>
-    <div class="status go" id="status">À toi !</div>
-    <div class="clock go" id="clock">GO</div>
-    <div class="bar"><div id="bar"></div></div>
+    <section class="streak" id="streak">
+      <div class="flame">🔥</div>
+      <div>
+        <div><b id="streakNum">0</b> <span class="label" id="streakLabel">jour d'affilée</span></div>
+        <p id="streakMsg"></p>
+      </div>
+    </section>
 
-    <button class="primary big" id="mainBtn">Série terminée</button>
-    <div class="controls">
-      <button id="minus">−15 s</button>
-      <button id="plus">+15 s</button>
-      <button id="pauseBtn">Pause</button>
-      <button id="finishBtn">Terminer l'exercice</button>
-    </div>
-    <div class="hint">Espace = action principale</div>
-    <div class="done-list" id="doneList"></div>
-  </section>
+    <div class="ex-list" id="exList"></div>
 
-  <section class="card session summary" id="summary">
-    <h2 id="sumTitle">Récap</h2>
-    <div class="stats">
-      <div class="stat"><b id="sumSets">0</b><span>séries</span></div>
-      <div class="stat"><b id="sumReps">0</b><span>répétitions</span></div>
-      <div class="stat"><b id="sumTime">0:00</b><span>durée</span></div>
-    </div>
-    <button class="primary" id="newSession">Nouvelle séance</button>
-  </section>
+    <section class="card">
+      <div class="section-head">
+        <h2>Badges</h2>
+        <small id="badgeCount"></small>
+      </div>
+      <div class="badges" id="badges"></div>
+    </section>
 
-  <section class="card">
-    <div class="head">
-      <h2>Historique</h2>
-      <button id="clearHist" class="danger">Effacer</button>
+    <section class="card">
+      <div class="section-head">
+        <h2>Historique</h2>
+        <button id="clearHist" class="btn-link btn-danger">Effacer</button>
+      </div>
+      <div id="history"></div>
+    </section>
+  </div>
+
+  <!-- ===================== PAGE EXERCICE ===================== -->
+  <div id="exView" hidden>
+    <div class="topbar">
+      <button id="backBtn" class="btn-ghost">← Accueil</button>
+      <h1 id="exTitle">Exercice</h1>
+      <span style="width:96px"></span>
     </div>
-    <div id="history"></div>
-  </section>
+
+    <details class="settings" id="settings">
+      <summary>⚙ Réglages de l'exercice</summary>
+      <div class="row">
+        <label><span id="lblStart">Reps série 1</span> <input type="number" id="exStart" min="1" step="1"></label>
+        <label><span id="lblInc">+ par série</span> <input type="number" id="exInc" min="0" step="1"></label>
+        <label>Pause (secondes) <input type="number" id="exRest" min="5" step="5"></label>
+      </div>
+    </details>
+
+    <!-- Séance en cours -->
+    <section class="card session" id="sessionCard">
+      <div class="stage" id="stage">
+        <div class="go-panel" id="goPanel">
+          <div class="kicker" id="goKicker">Série 1</div>
+          <div class="num" id="goNum">1</div>
+          <div class="unit" id="goUnit">traction</div>
+        </div>
+        <div class="ring" id="restPanel" hidden>
+          <svg viewBox="0 0 200 200" aria-hidden="true">
+            <circle class="bg" cx="100" cy="100" r="90"></circle>
+            <circle class="fg" id="ringFg" cx="100" cy="100" r="90"></circle>
+          </svg>
+          <div class="center">
+            <div class="kicker" id="restLabel">Récup</div>
+            <div class="time" id="time">1:30</div>
+            <div class="next" id="nextLabel"></div>
+          </div>
+        </div>
+      </div>
+
+      <p class="coach" id="coach" aria-live="polite"></p>
+
+      <div class="actions">
+        <button class="btn-go" id="mainBtn">Série terminée ✓</button>
+        <button class="btn-ghost" id="finishBtn">Fin de l'exercice</button>
+      </div>
+      <div class="rest-controls" id="restControls" hidden>
+        <button id="minus">−15 s</button>
+        <button id="pauseBtn">Pause</button>
+        <button id="plus">+15 s</button>
+      </div>
+      <div class="hint" id="hint"></div>
+
+      <div class="progress-block">
+        <div class="total-box">
+          <b id="liveTotal">0</b>
+          <span id="liveTotalLabel">tractions · 0 série</span>
+        </div>
+        <div class="stairs" id="stairs"></div>
+      </div>
+    </section>
+
+    <!-- Récap -->
+    <section class="card recap" id="recap" hidden>
+      <div class="kicker">Séance terminée</div>
+      <h2 id="recapMsg">Séance validée 💪</h2>
+      <div class="big-total"><b id="sumReps">0</b><span id="sumRepsLabel">tractions</span></div>
+      <div id="sumCompare" class="delta" hidden></div>
+      <div class="stats3">
+        <div><b id="sumSets">0</b><span>séries</span></div>
+        <div><b id="sumBest">0</b><span>meilleure série</span></div>
+        <div><b id="sumTime">0:00</b><span>durée</span></div>
+      </div>
+      <div class="stairs" id="sumStairs"></div>
+      <div class="ribbons" id="sumRecords"></div>
+      <div class="new-badges" id="sumBadgesWrap" hidden>
+        <div class="kicker">Badges débloqués</div>
+        <div class="badges" id="sumBadges"></div>
+      </div>
+      <div class="streak-line" id="sumStreak"></div>
+      <div class="actions">
+        <button class="btn-go" id="newSession">Nouvelle séance</button>
+        <button class="btn-ghost" id="homeBtn">Retour à l'accueil</button>
+      </div>
+    </section>
+  </div>
+
 </main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<canvas id="confetti" aria-hidden="true"></canvas>
 
 <script>
 (() => {
@@ -184,57 +496,340 @@
     }
   };
 
-  const DEFAULT_EX = [{ id: 'tractions', name: 'Tractions', start: 1, inc: 1, rest: 90 }];
-  let exercises = store.get('tt.exercises', DEFAULT_EX);
-  if (!Array.isArray(exercises) || !exercises.length) exercises = DEFAULT_EX;
+  // type 'reps'  : on compte des répétitions (unit = nom au singulier, ex. « traction »)
+  // type 'timed' : on tient une durée en secondes (start/inc en s), avec `prep` s de préparation
+  const DEFAULT_EX = [
+    { id: 'tractions', name: 'Tractions', type: 'reps', unit: 'traction', start: 1, inc: 1, rest: 90 },
+    { id: 'pompes', name: 'Pompes', type: 'reps', unit: 'pompe', start: 10, inc: 0, rest: 90 },
+    { id: 'deadhang', name: 'Dead hang', type: 'timed', unit: 'seconde', start: 20, inc: 10, rest: 90, prep: 5 },
+  ];
+  // La liste des exercices est fixée par DEFAULT_EX (ordre compris) ; on ne reprend du
+  // stockage que les réglages modifiés par l'utilisateur (start, inc, rest, prep).
+  // Les exercices enregistrés qui ne sont plus dans DEFAULT_EX (ex. anciens exercices
+  // ajoutés à la main) sont ignorés ; leur historique est rattaché par nom dans norm().
+  const stored = store.get('tt.exercises', []);
+  const SETTINGS = ['start', 'inc', 'rest', 'prep'];
+  let exercises = DEFAULT_EX.map(d => {
+    const s = Array.isArray(stored) ? stored.find(e => e && e.id === d.id) : null;
+    const ex = { ...d };
+    if (s) for (const k of SETTINGS) if (Number.isFinite(s[k])) ex[k] = s[k];
+    return ex;
+  });
   let activeId = store.get('tt.active', exercises[0].id);
   if (!exercises.some(e => e.id === activeId)) activeId = exercises[0].id;
   let history = store.get('tt.history', []);
+  if (!Array.isArray(history)) history = [];
+  let unlocked = store.get('tt.badges', {}); // { idBadge: date de déblocage }
 
+  const HISTORY_CAP = 2000;
   const saveEx = () => { store.set('tt.exercises', exercises); store.set('tt.active', activeId); };
-  const active = () => exercises.find(e => e.id === activeId);
+  const exById = id => exercises.find(e => e.id === id);
+  const active = () => exById(activeId);
+
+  // ---------- Historique & stats ----------
+  // Normalise une entrée d'historique (les anciennes n'ont ni exId, ni best, ni list)
+  function norm(h) {
+    const ex = (h.exId && exById(h.exId)) || exercises.find(e => e.name === h.name) || exercises[0];
+    const list = Array.isArray(h.list) ? h.list : null;
+    const best = h.best ?? (list ? Math.max(...list) : ex.start + Math.max(0, h.sets - 1) * ex.inc);
+    return { ...h, exId: ex.id, list, best };
+  }
+
+  // Stats d'un exercice (exId) ou de tous (exId = null). history est trié du plus récent au plus ancien.
+  function computeStats(exId) {
+    const hs = history.map(norm).filter(h => !exId || h.exId === exId);
+    let total = 0, bestSet = 0, bestSession = 0;
+    for (const h of hs) {
+      total += h.reps;
+      bestSet = Math.max(bestSet, h.best);
+      bestSession = Math.max(bestSession, h.reps);
+    }
+    return { total, bestSet, bestSession, sessions: hs.length, last: hs[0] || null, streak: streakDays() };
+  }
+
+  const dayStart = ts => { const d = new Date(ts); d.setHours(0, 0, 0, 0); return d.getTime(); };
+  const trainedToday = () => history.some(h => dayStart(h.date) === dayStart(Date.now()));
+
+  // Jours consécutifs avec au moins une séance ; la série court si la dernière est aujourd'hui ou hier.
+  function streakDays() {
+    const days = new Set(history.map(h => dayStart(h.date)));
+    const d = new Date(); d.setHours(0, 0, 0, 0);
+    if (!days.has(d.getTime())) d.setDate(d.getDate() - 1);
+    let n = 0;
+    while (days.has(d.getTime())) { n++; d.setDate(d.getDate() - 1); }
+    return n;
+  }
+
+  function ago(ts) {
+    const d = Math.round((dayStart(Date.now()) - dayStart(ts)) / 86400000);
+    return d <= 0 ? "aujourd'hui" : d === 1 ? 'hier' : `il y a ${d} jours`;
+  }
+
+  // ---------- Badges ----------
+  // ex = exercice concerné (stats de cet exercice) ; sans ex = stats globales (séances, streak)
+  const BADGES = [
+    { id: 's1',   icon: '🎯', name: 'Premier pas',  desc: '1re séance',              test: s => s.sessions >= 1 },
+    { id: 's10',  icon: '📅', name: 'Habitué·e',    desc: '10 séances',              test: s => s.sessions >= 10 },
+    { id: 's50',  icon: '🏛️', name: 'Pilier',       desc: '50 séances',              test: s => s.sessions >= 50 },
+    { id: 'st3',  icon: '🔥', name: 'En feu',       desc: '3 jours d\'affilée',      test: s => s.streak >= 3 },
+    { id: 'st7',  icon: '☄️', name: 'Semaine pleine', desc: '7 jours d\'affilée',    test: s => s.streak >= 7 },
+    { id: 'st30', icon: '🌋', name: 'Inarrêtable',  desc: '30 jours d\'affilée',     test: s => s.streak >= 30 },
+    { id: 'b5',   ex: 'tractions', icon: '💪', name: 'Série de 5',  desc: '5 tractions d\'affilée',  test: s => s.bestSet >= 5 },
+    { id: 'b10',  ex: 'tractions', icon: '⚡', name: 'Série de 10', desc: '10 tractions d\'affilée', test: s => s.bestSet >= 10 },
+    { id: 'b15',  ex: 'tractions', icon: '🦍', name: 'Série de 15', desc: '15 tractions d\'affilée', test: s => s.bestSet >= 15 },
+    { id: 'b20',  ex: 'tractions', icon: '👑', name: 'Série de 20', desc: '20 tractions d\'affilée', test: s => s.bestSet >= 20 },
+    { id: 'p50',  ex: 'tractions', icon: '🥈', name: 'Demi-siècle', desc: '50 tractions en une séance',  test: s => s.bestSession >= 50 },
+    { id: 'p100', ex: 'tractions', icon: '🏆', name: 'Centenaire',  desc: '100 tractions en une séance', test: s => s.bestSession >= 100 },
+    { id: 't100', ex: 'tractions', icon: '💯', name: 'Centurion',   desc: '100 tractions au total',   test: s => s.total >= 100 },
+    { id: 't500', ex: 'tractions', icon: '🧗', name: 'Grimpeur',    desc: '500 tractions au total',   test: s => s.total >= 500 },
+    { id: 't1k',  ex: 'tractions', icon: '🚀', name: 'Mille',       desc: '1 000 tractions au total', test: s => s.total >= 1000 },
+    { id: 't5k',  ex: 'tractions', icon: '🏔️', name: 'Sommet',      desc: '5 000 tractions au total', test: s => s.total >= 5000 },
+    { id: 'pp50',  ex: 'pompes', icon: '🫸', name: 'Cinquante pompes', desc: '50 pompes en une séance',  test: s => s.bestSession >= 50 },
+    { id: 'pp100', ex: 'pompes', icon: '🛡️', name: 'Cent pompes',      desc: '100 pompes en une séance', test: s => s.bestSession >= 100 },
+    { id: 'pt1k',  ex: 'pompes', icon: '🏋️', name: 'Mille pompes',     desc: '1 000 pompes au total',    test: s => s.total >= 1000 },
+    { id: 'h30',  ex: 'deadhang', icon: '🪝', name: 'Accroché·e',    desc: 'Dead hang de 30 s',  test: s => s.bestSet >= 30 },
+    { id: 'h60',  ex: 'deadhang', icon: '🦇', name: 'Chauve-souris', desc: 'Dead hang de 1 min', test: s => s.bestSet >= 60 },
+    { id: 'h120', ex: 'deadhang', icon: '🐒', name: 'Primate',       desc: 'Dead hang de 2 min', test: s => s.bestSet >= 120 },
+    { id: 'hs5',  ex: 'deadhang', icon: '⏱️', name: '5 min suspendu', desc: '5 min de dead hang en une séance', test: s => s.bestSession >= 300 },
+    { id: 'ht30', ex: 'deadhang', icon: '⏳', name: 'Demi-heure',    desc: '30 min de dead hang au total', test: s => s.total >= 1800 },
+  ];
+
+  // Débloque les badges atteints ; renvoie ceux qui viennent de l'être.
+  function checkBadges() {
+    const cache = {};
+    const statsFor = ex => (cache[ex || '*'] ||= computeStats(ex || null));
+    const fresh = BADGES.filter(b => !unlocked[b.id] && b.test(statsFor(b.ex)));
+    fresh.forEach(b => { unlocked[b.id] = Date.now(); });
+    if (fresh.length) store.set('tt.badges', unlocked);
+    return fresh;
+  }
+
+  const badgeHtml = (b, on) =>
+    `<div class="badge ${on ? 'on' : 'off'}" title="${escapeHtml(b.desc)}"><span class="ic">${b.icon}</span><b>${escapeHtml(b.name)}</b><small>${escapeHtml(b.desc)}</small></div>`;
+
+  // ---------- Messages d'encouragement ----------
+  const ENCOURAGEMENTS = [
+    'Respire profondément, la prochaine arrive.',
+    'Chaque traction compte.',
+    'Relâche les épaules, secoue les bras.',
+    'Pense à bien descendre bras tendus.',
+    'Petit à petit, l\'échelle monte.',
+    'Une gorgée d\'eau ?',
+    'La régularité bat le talent.',
+    'Visualise ta prochaine série : propre et contrôlée.',
+    'Un barreau de plus sur l\'échelle.',
+    'Contrôle la descente, c\'est là que ça travaille.',
+    'Gainage serré, jambes immobiles.',
+    'La meilleure série, c\'est la prochaine.',
+    'Menton au-dessus de la barre, à chaque fois.',
+    'Tu fais ce que la plupart ne font pas.',
+    'Les muscles se construisent pendant la récup. Patience.',
+  ];
+  let lastEnc = -1;
+  function randomEncouragement() {
+    let i;
+    do { i = Math.floor(Math.random() * ENCOURAGEMENTS.length); } while (i === lastEnc && ENCOURAGEMENTS.length > 1);
+    lastEnc = i;
+    return ENCOURAGEMENTS[i];
+  }
+
+  // Message affiché pendant la pause qui suit une série (ev = records battus sur cette série)
+  function coachMessage(ev) {
+    const ex = active(), p = session.prev, t = totalReps(), next = repsFor(session.set);
+    if (ev.session) return `🏆 Record de séance battu ! Tout ce qui suit, c'est du bonus.`;
+    if (ev.set) return `⚡ Ta meilleure série jamais faite. Énorme !`;
+    if (p.sessions && t <= p.bestSession) {
+      const need = p.bestSession - t + 1;
+      if (next >= need) return `🎯 La prochaine série te fait battre ton record de séance (${fmtVal(ex, p.bestSession)}) !`;
+      if (need <= next + repsFor(session.set + 1)) return `🎯 Plus que ${fmtVal(ex, need)} pour battre ton record de séance.`;
+    }
+    if (p.last && t <= p.last.reps && t + next > p.last.reps) return `📈 La prochaine série et tu dépasses ta dernière séance (${fmtVal(ex, p.last.reps)}).`;
+    return randomEncouragement();
+  }
+
+  function startMessage() {
+    const ex = active(), p = session.prev;
+    if (!p.last) return isTimed(ex)
+      ? `Première séance : clique sur Lancer, tu as ${ex.prep || 5} s pour te suspendre. 🚀`
+      : 'Première séance : vas-y à ton rythme, technique propre. 🚀';
+    return `Dernière fois : ${fmtVal(ex, p.last.reps)}. Record : ${fmtVal(ex, p.bestSession)}. On fait mieux ?`;
+  }
 
   // ---------- Éléments ----------
   const $ = id => document.getElementById(id);
   const el = {
-    exSelect: $('exSelect'), exName: $('exName'), exStart: $('exStart'), exInc: $('exInc'), exRest: $('exRest'),
-    setLabel: $('setLabel'), repsLabel: $('repsLabel'), status: $('status'), clock: $('clock'), bar: $('bar'),
-    mainBtn: $('mainBtn'), minus: $('minus'), plus: $('plus'), pauseBtn: $('pauseBtn'), finishBtn: $('finishBtn'),
-    doneList: $('doneList'), sessionCard: $('sessionCard'), summary: $('summary'),
-    sumTitle: $('sumTitle'), sumSets: $('sumSets'), sumReps: $('sumReps'), sumTime: $('sumTime'),
-    history: $('history')
+    homeView: $('homeView'), exView: $('exView'), exList: $('exList'),
+    greet: $('greet'), streak: $('streak'), streakNum: $('streakNum'), streakLabel: $('streakLabel'), streakMsg: $('streakMsg'),
+    badges: $('badges'), badgeCount: $('badgeCount'), history: $('history'),
+    exTitle: $('exTitle'), exStart: $('exStart'), exInc: $('exInc'), exRest: $('exRest'),
+    lblStart: $('lblStart'), lblInc: $('lblInc'), hint: $('hint'),
+    sessionCard: $('sessionCard'), stage: $('stage'),
+    goPanel: $('goPanel'), goKicker: $('goKicker'), goNum: $('goNum'), goUnit: $('goUnit'),
+    restPanel: $('restPanel'), ringFg: $('ringFg'), restLabel: $('restLabel'), time: $('time'), nextLabel: $('nextLabel'),
+    coach: $('coach'), mainBtn: $('mainBtn'), finishBtn: $('finishBtn'),
+    restControls: $('restControls'), minus: $('minus'), plus: $('plus'), pauseBtn: $('pauseBtn'),
+    liveTotal: $('liveTotal'), liveTotalLabel: $('liveTotalLabel'), stairs: $('stairs'),
+    recap: $('recap'), recapMsg: $('recapMsg'), sumReps: $('sumReps'), sumRepsLabel: $('sumRepsLabel'), sumCompare: $('sumCompare'),
+    sumSets: $('sumSets'), sumBest: $('sumBest'), sumTime: $('sumTime'), sumStairs: $('sumStairs'),
+    sumRecords: $('sumRecords'), sumBadgesWrap: $('sumBadgesWrap'), sumBadges: $('sumBadges'), sumStreak: $('sumStreak'),
+    toast: $('toast'), confetti: $('confetti'),
   };
+
+  const RING_C = 2 * Math.PI * 90;
+  el.ringFg.style.strokeDasharray = RING_C;
+
+  // ---------- Navigation ----------
+  // Routes par hash : '#/' = accueil, '#/ex/<id>' = page de l'exercice.
+  // Le bouton « précédent » du navigateur fonctionne donc aussi.
+  let view = null; // 'home' | 'ex'
+  const exHash = id => '#/ex/' + encodeURIComponent(id);
+
+  function route() {
+    const m = location.hash.match(/^#\/ex\/(.+)$/);
+    const id = m ? decodeURIComponent(m[1]) : null;
+    const target = id && exercises.some(e => e.id === id) ? id : null;
+
+    if (view === 'ex' && target === activeId) return; // déjà affiché
+    if (view === 'ex' && sessionInProgress() && !confirm('Une séance est en cours. L\'abandonner ?')) {
+      location.hash = exHash(activeId); // annule la navigation
+      return;
+    }
+    if (target) showExercise(target);
+    else showHome();
+  }
+
+  function showHome() {
+    view = 'home';
+    stopTimer();
+    stopBlink();
+    session = null;
+    renderHome();
+    el.exView.hidden = true;
+    el.homeView.hidden = false;
+    document.title = baseTitle;
+    window.scrollTo(0, 0);
+  }
+
+  function showExercise(id) {
+    view = 'ex';
+    activeId = id;
+    saveEx();
+    renderSettings();
+    newSession();
+    el.homeView.hidden = true;
+    el.exView.hidden = false;
+    window.scrollTo(0, 0);
+  }
 
   // ---------- Séance ----------
   // phase: 'go' (en train de faire la série) | 'rest' (pause en cours) | 'done' (récap)
-  let session;
-  const timer = { endAt: 0, total: 0, remainingWhenPaused: null, tick: null };
+  let session = null;
+  const timer = { endAt: 0, total: 0, remainingWhenPaused: null, tick: null, lastBeep: null };
+
+  const sessionInProgress = () => !!session && session.reps.length > 0 && session.phase !== 'done';
 
   function newSession() {
     stopTimer();
-    session = { set: 1, reps: [], startedAt: null, phase: 'go' };
-    el.summary.classList.remove('show');
-    el.sessionCard.style.display = '';
+    session = {
+      set: 1, reps: [], startedAt: null, phase: 'go',
+      prev: computeStats(activeId),        // stats avant cette séance (pour les records)
+      flags: { set: false, session: false }, // records déjà célébrés pendant la séance
+      coach: '',
+    };
+    session.coach = startMessage();
+    el.recap.hidden = true;
+    el.sessionCard.hidden = false;
     render();
   }
 
   const repsFor = n => { const e = active(); return e.start + (n - 1) * e.inc; };
+  const totalReps = () => session.reps.reduce((a, b) => a + b, 0);
 
-  function setDone() {
+  // Enregistre la série en cours comme faite (sans lancer la pause).
+  // Renvoie les records battus pour la première fois sur cette série.
+  // r = valeur réalisée (par défaut l'objectif de la série ; pour un exercice chronométré
+  // lâché avant la fin, la durée réellement tenue).
+  function recordSet(r = repsFor(session.set)) {
     if (session.startedAt === null) session.startedAt = Date.now();
-    session.reps.push(repsFor(session.set));
+    const ex = active();
+    session.reps.push(r);
     session.set++;
+
+    const ev = { set: false, session: false };
+    const p = session.prev;
+    if (p.sessions) {
+      if (!session.flags.set && r > p.bestSet) {
+        session.flags.set = ev.set = true;
+        celebrate(`Nouvelle meilleure série : ${fmtVal(ex, r)} !`);
+      }
+      if (!session.flags.session && totalReps() > p.bestSession) {
+        session.flags.session = ev.session = true;
+        celebrate(`Record de séance battu : ${fmtVal(ex, totalReps())} !`);
+      }
+    }
+    return ev;
+  }
+
+  function setDone(r) {
+    const ev = recordSet(r);
+    session.coach = coachMessage(ev);
     startRest();
   }
 
-  function startRest() {
-    session.phase = 'rest';
-    timer.total = active().rest * 1000;
-    timer.endAt = Date.now() + timer.total;
+  // Lance un compte à rebours pour la phase courante (prep, hold ou rest)
+  function startCountdown(phase, ms) {
+    session.phase = phase;
+    timer.total = ms;
+    timer.endAt = Date.now() + ms;
     timer.remainingWhenPaused = null;
+    timer.lastBeep = null;
+    render();
     runTick();
+  }
+
+  const startRest = () => startCountdown('rest', active().rest * 1000);
+
+  // --- Exercice chronométré : go → prep (5 s, bip chaque seconde) → hold (bip de départ) → rest
+  function startPrep() {
+    if (session.startedAt === null) session.startedAt = Date.now();
+    session.coach = 'Mets-toi en place, mains sur la barre…';
+    startCountdown('prep', (active().prep || 5) * 1000);
+  }
+
+  function startHold() {
+    goTone();
+    session.coach = 'Tiens bon ! Épaules engagées, respire calmement.';
+    startCountdown('hold', repsFor(session.set) * 1000);
+  }
+
+  // Objectif atteint
+  function holdComplete() {
+    stopTimer();
+    beep();
+    setDone(repsFor(session.set));
+  }
+
+  // Lâché avant la fin : on enregistre la durée réellement tenue
+  function holdDropped() {
+    const held = Math.floor((timer.total - remaining()) / 1000);
+    stopTimer();
+    if (held < 1) { session.phase = 'go'; render(); return; }
+    setDone(held);
+  }
+
+  function cancelPrep() {
+    stopTimer();
+    session.phase = 'go';
+    session.coach = 'Départ annulé. Relance quand tu es prêt·e.';
     render();
   }
+
+  // Bips de décompte : toute la préparation, puis les 3 dernières secondes
+  const PHASES = {
+    prep: { beepFrom: 99, end: () => startHold() },
+    hold: { beepFrom: 3, end: () => holdComplete() },
+    rest: { beepFrom: 3, end: () => endRest(true) },
+  };
 
   function runTick() {
     clearInterval(timer.tick);
@@ -251,11 +846,19 @@
   const remaining = () => timer.remainingWhenPaused ?? Math.max(0, timer.endAt - Date.now());
 
   function update() {
-    if (session.phase !== 'rest') return;
+    const cfg = session && PHASES[session.phase];
+    if (!cfg) return;
     const r = remaining();
-    el.clock.textContent = fmt(Math.ceil(r / 1000));
-    el.bar.style.width = (100 * (1 - r / timer.total)) + '%';
-    if (r <= 0) endRest(true);
+    const secs = Math.ceil(r / 1000);
+    el.time.textContent = session.phase === 'prep' ? secs : fmt(secs);
+    el.ringFg.style.strokeDashoffset = RING_C * (1 - r / timer.total);
+    el.stage.classList.toggle('danger', session.phase === 'rest' && secs <= 10);
+    // Bips de décompte
+    if (timer.remainingWhenPaused === null && secs >= 1 && secs <= cfg.beepFrom && secs !== timer.lastBeep) {
+      timer.lastBeep = secs;
+      tick();
+    }
+    if (r <= 0) cfg.end();
   }
 
   function endRest(alert) {
@@ -269,6 +872,7 @@
     if (session.phase !== 'rest') return;
     const d = sec * 1000;
     timer.total = Math.max(1000, timer.total + d);
+    timer.lastBeep = null;
     if (timer.remainingWhenPaused !== null) {
       timer.remainingWhenPaused = Math.max(0, timer.remainingWhenPaused + d);
       if (timer.remainingWhenPaused === 0) return endRest(true);
@@ -291,78 +895,310 @@
     render();
   }
 
+  // Fin de l'exercice : si on est en train de faire une série (phase 'go'),
+  // c'est la dernière série → elle est comptée. Pendant une pause, rien à ajouter.
+  // Exercice chronométré : en 'go' la série n'a pas été faite → rien à ajouter ;
+  // en 'hold' on compte la durée tenue ; en 'prep' on annule le départ.
   function finish() {
-    if (!session.reps.length) return;
+    if (session.phase === 'done') return;
+    stopBlink();
+    const timed = isTimed(active());
+    if (session.phase === 'go' && !timed) recordSet();
+    if (session.phase === 'hold') {
+      const held = Math.floor((timer.total - remaining()) / 1000);
+      if (held >= 1) recordSet(held);
+    }
     stopTimer();
+    if (!session.reps.length) { session.phase = 'go'; render(); return; }
     session.phase = 'done';
-    const total = session.reps.reduce((a, b) => a + b, 0);
+
+    const list = session.reps.slice();
+    const total = totalReps();
+    const best = Math.max(...list);
     const dur = Math.round((Date.now() - session.startedAt) / 1000);
-    history.unshift({ date: Date.now(), name: active().name, sets: session.reps.length, reps: total, dur });
-    history = history.slice(0, 200);
+    const ex = active();
+    history.unshift({ date: Date.now(), exId: ex.id, name: ex.name, sets: list.length, reps: total, best, list, dur });
+    history = history.slice(0, HISTORY_CAP);
     store.set('tt.history', history);
 
-    el.sumTitle.textContent = 'Récap — ' + active().name;
-    el.sumSets.textContent = session.reps.length;
-    el.sumReps.textContent = total;
-    el.sumTime.textContent = fmt(dur);
-    el.sessionCard.style.display = 'none';
-    el.summary.classList.add('show');
-    renderHistory();
+    const fresh = checkBadges();
+    const p = session.prev;
+    const recSession = p.sessions > 0 && total > p.bestSession;
+    const recSet = p.sessions > 0 && best > p.bestSet;
+    renderRecap({ list, total, best, dur, p, recSession, recSet, fresh });
+    if (recSession || recSet || fresh.length) confetti();
   }
 
   // ---------- Rendu ----------
   const fmt = s => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
   const plural = (n, w) => `${n} ${w}${n > 1 ? 's' : ''}`;
+  const unitOf = e => e.unit || 'répétition';
+  const unitPlural = e => unitOf(e) + 's';
+  const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+  const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const isTimed = e => e.type === 'timed';
+  // Valeur courte (chiffre seul) : 12 / « 45 s » / « 1:30 »
+  const fmtNum = (e, n) => !isTimed(e) ? String(n) : n < 60 ? `${n} s` : fmt(n);
+  // Valeur avec unité : « 12 tractions » / « 45 s » / « 1:30 »
+  const fmtVal = (e, n) => isTimed(e) ? fmtNum(e, n) : plural(n, unitOf(e));
 
   function render() {
-    const reps = repsFor(session.set);
-    el.setLabel.textContent = `Série ${session.set}`;
-    el.repsLabel.textContent = plural(reps, 'répétition');
-    const resting = session.phase === 'rest';
+    const ex = active();
+    const timed = isTimed(ex);
+    const phase = session.phase;
+    const counting = phase in PHASES;          // anneau affiché
+    const resting = phase === 'rest';
     const paused = timer.remainingWhenPaused !== null;
+    const reps = repsFor(session.set);
 
-    el.status.className = 'status ' + (resting ? 'rest' : 'go');
-    el.status.textContent = resting ? (paused ? 'Pause (en attente)' : 'Récupération') : 'À toi !';
-    el.clock.className = 'clock' + (resting ? '' : ' go');
-    if (!resting) { el.clock.textContent = 'GO'; el.bar.style.width = '0%'; }
-    else update();
+    el.stage.dataset.phase = phase;
+    el.goPanel.hidden = counting;
+    el.restPanel.hidden = !counting;
+    el.stage.classList.toggle('paused', resting && paused);
+    if (!resting) el.stage.classList.remove('danger');
 
-    el.mainBtn.textContent = resting ? 'Passer la pause' : 'Série terminée';
-    el.minus.disabled = el.plus.disabled = el.pauseBtn.disabled = !resting;
-    el.pauseBtn.textContent = paused ? 'Reprendre' : 'Pause';
-    el.finishBtn.disabled = !session.reps.length;
+    // Panneau GO
+    el.goKicker.textContent = timed ? `Série ${session.set} · Prêt·e ?` : `Série ${session.set} · GO !`;
+    el.goNum.textContent = timed ? fmtNum(ex, reps).replace(' s', '') : reps;
+    el.goUnit.textContent = timed ? (reps < 60 ? 'secondes' : 'minutes') : reps > 1 ? unitPlural(ex) : unitOf(ex);
 
-    el.doneList.textContent = session.reps.length
-      ? `Fait : ${session.reps.join(' + ')} = ${session.reps.reduce((a, b) => a + b, 0)}`
-      : '';
+    // Anneau
+    el.restLabel.textContent =
+      phase === 'prep' ? 'Prépare-toi' : phase === 'hold' ? 'Tiens bon !' : paused ? 'En pause' : 'Récup';
+    el.nextLabel.textContent =
+      phase === 'prep' ? `Série ${session.set} · objectif ${fmtVal(ex, reps)}`
+      : phase === 'hold' ? `Objectif ${fmtVal(ex, reps)}`
+      : `Ensuite : série ${session.set} · ${fmtVal(ex, reps)}`;
+
+    // Boutons
+    const labels = {
+      go: timed ? 'Lancer ▶' : 'Série terminée ✓',
+      prep: 'Annuler le départ',
+      hold: 'Lâché ✋',
+      rest: 'Passer la pause ⏭',
+    };
+    el.mainBtn.textContent = labels[phase] || '';
+    el.mainBtn.className = phase === 'go' ? 'btn-go' : 'btn-skip';
+    el.finishBtn.disabled = timed && phase === 'go' && !session.reps.length;
+    el.restControls.hidden = !resting;
+    el.pauseBtn.textContent = paused ? '▶ Reprendre' : '⏸ Pause';
+    el.coach.textContent = session.coach;
+    el.hint.innerHTML = timed
+      ? `<kbd>Espace</kbd> action principale · ${ex.prep || 5} s de préparation avec décompte sonore, puis bips de départ et de fin`
+      : `<kbd>Espace</kbd> action principale · après ta dernière série, « Fin de l'exercice » la compte automatiquement`;
+
+    // Progression
+    el.liveTotal.textContent = fmtNum(ex, totalReps());
+    el.liveTotalLabel.textContent = `${timed ? 'suspendu' : unitPlural(ex)} · ${plural(session.reps.length, 'série')}`;
+    renderStairs(el.stairs, session.reps, reps);
+
+    if (counting) update();
   }
 
-  function renderExercises() {
-    el.exSelect.innerHTML = '';
-    for (const e of exercises) {
-      const o = document.createElement('option');
-      o.value = e.id; o.textContent = e.name || '(sans nom)';
-      if (e.id === activeId) o.selected = true;
-      el.exSelect.appendChild(o);
+  // Escalier : une barre par série faite (la plus haute en or) + la prochaine en pointillés
+  function renderStairs(container, list, next) {
+    const all = next ? [...list, next] : list;
+    if (!list.length) { container.innerHTML = ''; return; }
+    const max = Math.max(1, ...all);
+    const top = Math.max(...list);
+    container.classList.toggle('dense', all.length > 18);
+    container.innerHTML = all.map((r, i) => {
+      const ghost = next && i === all.length - 1;
+      const cls = 'step' + (ghost ? ' ghost' : r === top && list.length > 1 ? ' top' : '');
+      return `<div class="${cls}" style="height:${Math.max(6, (r / max) * 100)}%"><span>${r}</span></div>`;
+    }).join('');
+  }
+
+  function renderRecap({ list, total, best, dur, p, recSession, recSet, fresh }) {
+    const ex = active();
+    let msg = 'Séance validée 💪';
+    if (!p.sessions) msg = 'Première séance validée ! 🎉';
+    else if (recSession) msg = 'Record pulvérisé ! 🏆';
+    else if (p.last && total > p.last.reps) msg = 'En progrès ! 📈';
+    else if (p.last && total === p.last.reps) msg = 'Régulier comme une horloge ⏱️';
+    else msg = 'Séance validée, c\'est ça qui compte 💪';
+    el.recapMsg.textContent = msg;
+
+    const timed = isTimed(ex);
+    el.sumReps.textContent = fmtNum(ex, total);
+    el.sumRepsLabel.textContent = timed ? 'de suspension' : total > 1 ? unitPlural(ex) : unitOf(ex);
+    if (p.last) {
+      const d = total - p.last.reps;
+      el.sumCompare.hidden = false;
+      el.sumCompare.className = 'delta' + (d > 0 ? ' up' : '');
+      el.sumCompare.textContent = d === 0
+        ? `= dernière séance (${fmtNum(ex, p.last.reps)})`
+        : `${d > 0 ? '+' : '−'}${fmtNum(ex, Math.abs(d))} vs dernière séance (${fmtNum(ex, p.last.reps)})`;
+    } else {
+      el.sumCompare.hidden = true;
     }
+    el.sumSets.textContent = list.length;
+    el.sumBest.textContent = fmtNum(ex, best);
+    el.sumTime.textContent = fmt(dur);
+    renderStairs(el.sumStairs, list, null);
+
+    const ribbons = [];
+    if (recSession) ribbons.push(`🏆 Nouveau record de séance : ${fmtVal(ex, total)}`);
+    if (recSet) ribbons.push(`⚡ Nouvelle meilleure série : ${fmtVal(ex, best)}`);
+    el.sumRecords.innerHTML = ribbons.map(r => `<div class="ribbon">${escapeHtml(r)}</div>`).join('');
+
+    el.sumBadgesWrap.hidden = !fresh.length;
+    el.sumBadges.innerHTML = fresh.map(b => badgeHtml(b, true)).join('');
+
+    const st = streakDays();
+    el.sumStreak.textContent = `🔥 ${plural(st, 'jour')} d'affilée`;
+
+    el.sessionCard.hidden = true;
+    el.recap.hidden = false;
+    window.scrollTo(0, 0);
+  }
+
+  function describe(e) {
+    const t = isTimed(e);
+    const s = n => (t ? fmtNum(e, n) : n);
+    const prog = e.inc ? `${s(e.start)} → +${s(e.inc)} par série` : `${fmtVal(e, e.start)} par série`;
+    return `${prog} · pause ${fmt(e.rest)}` + (t ? ` · départ dans ${e.prep || 5} s` : '');
+  }
+
+  function renderHome() {
+    // Salutation
+    const h = new Date().getHours();
+    el.greet.textContent = h < 5 ? 'Séance de nuit ?' : h < 12 ? 'Bonjour, on grimpe ?' : h < 18 ? 'On grimpe ?' : 'Bonsoir, on grimpe ?';
+
+    // Streak
+    const s = computeStats(null);
+    const today = trainedToday();
+    el.streak.classList.toggle('cold', s.streak === 0);
+    el.streakNum.textContent = s.streak;
+    el.streakLabel.textContent = s.streak > 1 ? "jours d'affilée" : "jour d'affilée";
+    el.streakMsg.textContent =
+      !s.sessions ? 'Lance ta première séance pour allumer la flamme.'
+      : s.streak === 0 ? 'La flamme s\'est éteinte. Une séance aujourd\'hui pour la rallumer !'
+      : today ? 'Séance du jour validée 💪 Reviens demain pour continuer.'
+      : 'Entraîne-toi aujourd\'hui pour garder ta série !';
+
+    // Cartes exercice (avec leurs stats : les unités diffèrent d'un exercice à l'autre)
+    el.exList.innerHTML = '';
+    for (const e of exercises) {
+      const st = computeStats(e.id);
+      const last = st.last;
+      const n = v => (st.sessions ? fmtNum(e, v) : '–');
+      const b = document.createElement('button');
+      b.className = 'ex-card';
+      b.innerHTML =
+        `<div class="name">${escapeHtml(e.name)}</div>` +
+        `<div class="meta">${escapeHtml(describe(e))}</div>` +
+        `<div class="last">${last ? `Dernière séance : <b>${escapeHtml(fmtVal(e, last.reps))}</b> · ${ago(last.date)}` : 'Pas encore de séance'}</div>` +
+        `<div class="mini">` +
+          `<div><b>${isTimed(e) ? n(st.total) : st.total.toLocaleString('fr-FR')}</b><span>${isTimed(e) ? 'suspendu au total' : 'au total'}</span></div>` +
+          `<div class="gold"><b>${n(st.bestSet)}</b><span>meilleure série</span></div>` +
+          `<div class="gold"><b>${n(st.bestSession)}</b><span>meilleure séance</span></div>` +
+          `<div><b>${st.sessions}</b><span>séances</span></div>` +
+        `</div>` +
+        `<span class="cta">C'est parti →</span>`;
+      b.addEventListener('click', () => { location.hash = exHash(e.id); });
+      el.exList.appendChild(b);
+    }
+
+    // Badges
+    const n = BADGES.filter(b => unlocked[b.id]).length;
+    el.badgeCount.textContent = `${n} / ${BADGES.length} débloqués`;
+    el.badges.innerHTML = BADGES.map(b => badgeHtml(b, !!unlocked[b.id])).join('');
+
+    renderHistory();
+  }
+
+  function renderSettings() {
     const a = active();
-    el.exName.value = a.name;
+    el.exTitle.textContent = a.name;
+    document.title = a.name + ' — ' + baseTitle;
+    const t = isTimed(a);
+    el.lblStart.textContent = t ? 'Durée série 1 (s)' : 'Reps série 1';
+    el.lblInc.textContent = t ? '+ par série (s)' : '+ par série';
     el.exStart.value = a.start;
     el.exInc.value = a.inc;
     el.exRest.value = a.rest;
-    $('delEx').disabled = exercises.length < 2;
   }
 
   function renderHistory() {
-    if (!history.length) { el.history.innerHTML = '<p class="empty">Aucune séance enregistrée.</p>'; return; }
-    const rows = history.slice(0, 10).map(h => {
-      const d = new Date(h.date).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' });
-      return `<tr><td>${d}</td><td>${escapeHtml(h.name)}</td><td class="num">${h.sets}</td><td class="num">${h.reps}</td><td class="num">${fmt(h.dur)}</td></tr>`;
+    if (!history.length) { el.history.innerHTML = '<p class="empty">Aucune séance pour l\'instant. La première est la plus importante !</p>'; return; }
+    // Séances record (meilleur total au moment où elles ont été faites, hors toute première)
+    const records = new Set();
+    const bestByEx = {};
+    const all = history.map(norm);
+    for (let i = all.length - 1; i >= 0; i--) {
+      const h = all[i];
+      if (h.exId in bestByEx && h.reps > bestByEx[h.exId]) records.add(i);
+      bestByEx[h.exId] = Math.max(bestByEx[h.exId] ?? 0, h.reps);
+    }
+    const rows = all.slice(0, 10).map((h, i) => {
+      const d = new Date(h.date).toLocaleString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+      const ex = exById(h.exId) || exercises[0];
+      return `<tr><td class="star">${records.has(i) ? '★' : ''}</td><td>${d}</td><td>${escapeHtml(h.name)}</td>` +
+        `<td class="num">${h.sets}</td><td class="num"><b>${fmtNum(ex, h.reps)}</b></td><td class="num">${fmtNum(ex, h.best)}</td><td class="num">${fmt(h.dur)}</td></tr>`;
     }).join('');
-    el.history.innerHTML = `<table><thead><tr><th>Date</th><th>Exercice</th><th class="num">Séries</th><th class="num">Reps</th><th class="num">Durée</th></tr></thead><tbody>${rows}</tbody></table>`;
+    el.history.innerHTML =
+      `<table><thead><tr><th></th><th>Date</th><th>Exercice</th><th class="num">Séries</th><th class="num">Total</th><th class="num">Max</th><th class="num">Durée</th></tr></thead>` +
+      `<tbody>${rows}</tbody></table>`;
   }
 
-  const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  // ---------- Célébrations : toast + confettis ----------
+  const reducedMotion = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const toastQueue = [];
+  let toastBusy = false;
+  function toast(text) {
+    toastQueue.push(text);
+    if (!toastBusy) nextToast();
+  }
+  function nextToast() {
+    const t = toastQueue.shift();
+    if (!t) { toastBusy = false; return; }
+    toastBusy = true;
+    el.toast.textContent = t;
+    el.toast.classList.add('show');
+    setTimeout(() => { el.toast.classList.remove('show'); setTimeout(nextToast, 400); }, 2600);
+  }
+  function celebrate(text) { toast('🏆 ' + text); confetti(); }
+
+  let parts = [], confettiRaf = null;
+  function confetti() {
+    if (reducedMotion()) return;
+    const c = el.confetti;
+    c.width = innerWidth; c.height = innerHeight;
+    const css = getComputedStyle(document.documentElement);
+    const colors = ['--gold', '--go', '--rest', '--blue', '--danger'].map(v => css.getPropertyValue(v).trim());
+    for (let i = 0; i < 150; i++) {
+      parts.push({
+        x: innerWidth / 2 + (Math.random() - .5) * innerWidth * .4,
+        y: innerHeight * .35,
+        vx: (Math.random() - .5) * 14,
+        vy: -Math.random() * 13 - 4,
+        s: 5 + Math.random() * 6,
+        a: Math.random() * Math.PI,
+        va: (Math.random() - .5) * .35,
+        color: colors[i % colors.length],
+        life: 0,
+      });
+    }
+    if (!confettiRaf) confettiRaf = requestAnimationFrame(drawConfetti);
+  }
+  function drawConfetti() {
+    const c = el.confetti, ctx = c.getContext('2d');
+    ctx.clearRect(0, 0, c.width, c.height);
+    parts = parts.filter(p => p.y < c.height + 30 && p.life < 150);
+    for (const p of parts) {
+      p.vy += .35; p.vx *= .985; p.x += p.vx; p.y += p.vy; p.a += p.va; p.life++;
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, 1 - p.life / 150);
+      ctx.translate(p.x, p.y); ctx.rotate(p.a);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2);
+      ctx.restore();
+    }
+    confettiRaf = parts.length ? requestAnimationFrame(drawConfetti) : null;
+    if (!parts.length) ctx.clearRect(0, 0, c.width, c.height);
+  }
 
   // ---------- Son & titre ----------
   let audioCtx;
@@ -372,32 +1208,38 @@
       if (audioCtx.state === 'suspended') audioCtx.resume();
     } catch {}
   }
-  function beep() {
+  // tones = [[décalage (s), fréquence (Hz)], ...]
+  function playTones(tones, len = .22, vol = .4) {
     if (!audioCtx) return;
     const t0 = audioCtx.currentTime;
-    [0, 0.3, 0.6].forEach((off, i) => {
+    for (const [off, freq] of tones) {
       const o = audioCtx.createOscillator();
       const g = audioCtx.createGain();
-      o.frequency.value = i === 2 ? 1320 : 880;
+      o.frequency.value = freq;
       g.gain.setValueAtTime(0.0001, t0 + off);
-      g.gain.exponentialRampToValueAtTime(0.4, t0 + off + 0.02);
-      g.gain.exponentialRampToValueAtTime(0.0001, t0 + off + 0.22);
+      g.gain.exponentialRampToValueAtTime(vol, t0 + off + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + off + len);
       o.connect(g).connect(audioCtx.destination);
       o.start(t0 + off);
-      o.stop(t0 + off + 0.25);
-    });
+      o.stop(t0 + off + len + 0.03);
+    }
   }
+  const tick = () => playTones([[0, 660]], .1, .25);                        // décompte (bip court)
+  const goTone = () => playTones([[0, 1320]], .6, .45);                     // départ : bip long aigu
+  const beep = () => playTones([[0, 880], [0.3, 880], [0.6, 1320]]);      // fin (pause ou effort)
 
   const baseTitle = document.title;
   let blink = null;
+  let titleBeforeBlink = baseTitle;
   function blinkTitle() {
     stopBlink();
+    titleBeforeBlink = document.title;
     let on = false;
-    blink = setInterval(() => { document.title = (on = !on) ? '⏰ GO !' : baseTitle; }, 700);
+    blink = setInterval(() => { document.title = (on = !on) ? '⏰ GO !' : titleBeforeBlink; }, 700);
     document.title = '⏰ GO !';
   }
   function stopBlink() {
-    if (blink) { clearInterval(blink); blink = null; document.title = baseTitle; }
+    if (blink) { clearInterval(blink); blink = null; document.title = titleBeforeBlink; }
   }
   window.addEventListener('focus', () => { if (document.hasFocus()) setTimeout(stopBlink, 3000); });
   document.addEventListener('pointerdown', stopBlink);
@@ -406,8 +1248,12 @@
   function mainAction() {
     ensureAudio();
     stopBlink();
-    if (session.phase === 'go') setDone();
-    else if (session.phase === 'rest') endRest(false);
+    switch (session.phase) {
+      case 'go': isTimed(active()) ? startPrep() : setDone(); break;
+      case 'prep': cancelPrep(); break;
+      case 'hold': holdDropped(); break;
+      case 'rest': endRest(false); break;
+    }
   }
 
   el.mainBtn.addEventListener('click', mainAction);
@@ -416,40 +1262,17 @@
   el.pauseBtn.addEventListener('click', togglePause);
   el.finishBtn.addEventListener('click', finish);
   $('newSession').addEventListener('click', newSession);
+  $('backBtn').addEventListener('click', () => { location.hash = '#/'; });
+  $('homeBtn').addEventListener('click', () => { location.hash = '#/'; });
+  window.addEventListener('hashchange', route);
 
   document.addEventListener('keydown', e => {
-    if (e.code !== 'Space') return;
+    if (view !== 'ex' || e.code !== 'Space') return;
     const tag = document.activeElement && document.activeElement.tagName;
-    if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
     e.preventDefault();
     if (session.phase === 'done') newSession();
     else mainAction();
-  });
-
-  const confirmAbandon = () => !session.reps.length || session.phase === 'done'
-    || confirm('Une séance est en cours. L\'abandonner ?');
-
-  el.exSelect.addEventListener('change', () => {
-    if (!confirmAbandon()) { el.exSelect.value = activeId; return; }
-    activeId = el.exSelect.value;
-    saveEx(); renderExercises(); newSession();
-  });
-
-  $('addEx').addEventListener('click', () => {
-    if (!confirmAbandon()) return;
-    const e = { id: 'ex' + Date.now(), name: 'Nouvel exercice', start: 10, inc: 0, rest: 90 };
-    exercises.push(e);
-    activeId = e.id;
-    saveEx(); renderExercises(); newSession();
-    el.exName.focus(); el.exName.select();
-  });
-
-  $('delEx').addEventListener('click', () => {
-    if (exercises.length < 2) return;
-    if (!confirm(`Supprimer « ${active().name} » ?`)) return;
-    exercises = exercises.filter(e => e.id !== activeId);
-    activeId = exercises[0].id;
-    saveEx(); renderExercises(); newSession();
   });
 
   const intField = (input, key, min) => input.addEventListener('input', () => {
@@ -457,28 +1280,22 @@
     if (Number.isNaN(v) || v < min) return;
     active()[key] = v;
     saveEx();
-    if (session.phase !== 'done') render();
+    if (session && session.phase !== 'done') render();
   });
   intField(el.exStart, 'start', 1);
   intField(el.exInc, 'inc', 0);
   intField(el.exRest, 'rest', 1);
-  el.exName.addEventListener('input', () => {
-    active().name = el.exName.value;
-    el.exSelect.options[el.exSelect.selectedIndex].textContent = el.exName.value || '(sans nom)';
-    saveEx();
-  });
 
   $('clearHist').addEventListener('click', () => {
-    if (!history.length || !confirm('Effacer tout l\'historique ?')) return;
+    if (!history.length || !confirm('Effacer tout l\'historique ? (les badges débloqués sont conservés)')) return;
     history = [];
     store.set('tt.history', history);
-    renderHistory();
+    renderHome();
   });
 
   // ---------- Init ----------
-  renderExercises();
-  renderHistory();
-  newSession();
+  checkBadges(); // synchronise les badges avec un historique existant
+  route();
 })();
 </script>
 </body>
