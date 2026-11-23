@@ -108,6 +108,8 @@
   .btn-link { background: none; border: none; color: var(--muted); padding: 6px 8px; }
   .btn-link:hover { color: var(--text); }
   .btn-danger { color: var(--danger); background: transparent; }
+  .btn-fail { color: var(--danger); background: transparent; border-color: rgba(255, 77, 94, .5); }
+  .btn-fail:hover { border-color: var(--danger); background: rgba(255, 77, 94, .08); }
 
   /* ===== Accueil ===== */
   .hero { display: flex; justify-content: space-between; align-items: end; gap: 16px; margin-bottom: 22px; flex-wrap: wrap; }
@@ -157,7 +159,7 @@
   .ex-card .meta { color: var(--muted); font-size: .95rem; grid-column: 1; }
   .ex-card .last { color: var(--text); font-size: .95rem; grid-column: 1; }
   .ex-card .cta {
-    grid-column: 2; grid-row: 1 / span 4;
+    grid-column: 2; grid-row: 1 / span 5;
     background: var(--go); color: var(--go-ink);
     font-family: var(--display); font-weight: 800; font-size: 1.4rem; text-transform: uppercase; letter-spacing: .04em;
     padding: 12px 22px; border-radius: 12px;
@@ -179,6 +181,41 @@
   .badge.on { border-color: rgba(255, 200, 61, .45); background: linear-gradient(180deg, rgba(255, 200, 61, .12), transparent), var(--card-2); }
   .badge.off .ic { filter: grayscale(1); opacity: .3; }
   .badge.off b { color: var(--faint); }
+  .badge .date { color: var(--gold); font-size: .75rem; margin-top: 6px; }
+  .badge .prog { color: var(--muted); font-size: .75rem; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .pbar { height: 6px; background: var(--track); border-radius: 99px; overflow: hidden; margin-top: 8px; }
+  .pbar > div { height: 100%; background: linear-gradient(90deg, var(--rest), var(--gold)); border-radius: 99px; }
+
+  /* Lien vers la page badges (accueil) */
+  .badges-link {
+    font-family: var(--display); font-weight: 700; font-size: 1.25rem; letter-spacing: .02em;
+    color: var(--gold); border-color: rgba(255, 200, 61, .4);
+    background: linear-gradient(180deg, rgba(255, 200, 61, .1), transparent), var(--card);
+    padding: 10px 18px;
+  }
+  .badges-link:hover { border-color: var(--gold); box-shadow: 0 6px 30px rgba(255, 200, 61, .15); }
+  .badges-link b { color: var(--text); }
+
+  /* Badges gagnés en pastilles (cartes d'exercice, bandeau streak) */
+  .chip {
+    display: inline-grid; place-items: center;
+    width: 38px; height: 38px; font-size: 1.25rem;
+    border-radius: 10px;
+    background: rgba(255, 200, 61, .12);
+    border: 1px solid rgba(255, 200, 61, .4);
+  }
+  .streak-badges { margin-left: auto; display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; max-width: 45%; }
+  .ex-badges { grid-column: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 12px; }
+  .ex-badges .next { color: var(--muted); font-size: .85rem; margin-left: 4px; }
+  .ex-badges .next b { color: var(--text); font-weight: 600; }
+
+  /* Page badges */
+  .badge-summary .big { display: flex; align-items: baseline; gap: 10px; }
+  .badge-summary .big b { font-family: var(--display); font-weight: 800; font-size: 4rem; line-height: 1; color: var(--gold); }
+  .badge-summary .big span { color: var(--muted); font-size: 1.1rem; }
+  .badge-summary .big-bar { height: 12px; margin-top: 12px; }
+  .badge-summary p { margin: 10px 0 0; color: var(--muted); }
+  .bg-group .badges { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
 
   table { width: 100%; border-collapse: collapse; font-size: .92rem; }
   th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--border); }
@@ -327,6 +364,7 @@
   }
   .new-badges { margin-top: 20px; }
   .new-badges .badges { max-width: 560px; margin: 10px auto 0; }
+  .new-badges .btn-link { margin-top: 8px; color: var(--gold); }
   .recap .streak-line { margin-top: 18px; font-family: var(--display); font-size: 1.3rem; font-weight: 700; color: var(--rest); }
   .recap .actions { margin-top: 24px; }
 
@@ -362,6 +400,7 @@
         <div class="brand">TIMER TRACTION</div>
         <h1 id="greet">On grimpe ?</h1>
       </div>
+      <button class="badges-link" id="badgesBtn">🏅 Badges <b id="badgeCount">0 / 0</b> →</button>
     </header>
 
     <section class="streak" id="streak">
@@ -370,17 +409,10 @@
         <div><b id="streakNum">0</b> <span class="label" id="streakLabel">jour d'affilée</span></div>
         <p id="streakMsg"></p>
       </div>
+      <div class="streak-badges" id="globalBadges"></div>
     </section>
 
     <div class="ex-list" id="exList"></div>
-
-    <section class="card">
-      <div class="section-head">
-        <h2>Badges</h2>
-        <small id="badgeCount"></small>
-      </div>
-      <div class="badges" id="badges"></div>
-    </section>
 
     <section class="card">
       <div class="section-head">
@@ -389,6 +421,28 @@
       </div>
       <div id="history"></div>
     </section>
+  </div>
+
+  <!-- ===================== PAGE BADGES ===================== -->
+  <div id="badgesView" hidden>
+    <div class="topbar">
+      <button id="badgesBack" class="btn-ghost">← Accueil</button>
+      <h1>Badges</h1>
+      <span style="width:96px"></span>
+    </div>
+
+    <section class="card badge-summary">
+      <div class="big"><b id="bgCount">0</b><span id="bgTotal">/ 0 débloqués</span></div>
+      <div class="pbar big-bar"><div id="bgBar"></div></div>
+      <p id="bgMsg"></p>
+    </section>
+
+    <section class="card" id="bgNextWrap">
+      <div class="section-head"><h2>🎯 Prochains objectifs</h2><small>les plus proches</small></div>
+      <div class="badges" id="bgNext"></div>
+    </section>
+
+    <div id="bgGroups"></div>
   </div>
 
   <!-- ===================== PAGE EXERCICE ===================== -->
@@ -434,6 +488,7 @@
       <div class="actions">
         <button class="btn-go" id="mainBtn">Série terminée ✓</button>
         <button class="btn-ghost" id="finishBtn">Fin de l'exercice</button>
+        <button class="btn-fail" id="failBtn" hidden title="Termine la séance sans compter l'essai en cours">Je n'ai pas réussi ✗</button>
       </div>
       <div class="rest-controls" id="restControls" hidden>
         <button id="minus">−15 s</button>
@@ -467,6 +522,7 @@
       <div class="new-badges" id="sumBadgesWrap" hidden>
         <div class="kicker">Badges débloqués</div>
         <div class="badges" id="sumBadges"></div>
+        <button class="btn-link" id="sumBadgesLink">Voir tous les badges →</button>
       </div>
       <div class="streak-line" id="sumStreak"></div>
       <div class="actions">
@@ -502,6 +558,7 @@
     { id: 'tractions', name: 'Tractions', type: 'reps', unit: 'traction', start: 1, inc: 1, rest: 90 },
     { id: 'pompes', name: 'Pompes', type: 'reps', unit: 'pompe', start: 10, inc: 0, rest: 90 },
     { id: 'deadhang', name: 'Dead hang', type: 'timed', unit: 'seconde', start: 20, inc: 10, rest: 90, prep: 5 },
+    { id: 'lsit', name: 'L-sit hang', type: 'timed', unit: 'seconde', start: 5, inc: 5, rest: 90, prep: 5 },
   ];
   // La liste des exercices est fixée par DEFAULT_EX (ordre compris) ; on ne reprend du
   // stockage que les réglages modifiés par l'utilisateur (start, inc, rest, prep).
@@ -538,13 +595,28 @@
   // Stats d'un exercice (exId) ou de tous (exId = null). history est trié du plus récent au plus ancien.
   function computeStats(exId) {
     const hs = history.map(norm).filter(h => !exId || h.exId === exId);
-    let total = 0, bestSet = 0, bestSession = 0;
+    let total = 0, bestSet = 0, bestSession = 0, longest = 0, early = 0, late = 0;
+    const days = new Map(); // jour → Set des exercices faits ce jour-là
     for (const h of hs) {
       total += h.reps;
       bestSet = Math.max(bestSet, h.best);
       bestSession = Math.max(bestSession, h.reps);
+      longest = Math.max(longest, h.dur || 0);
+      const hour = new Date(h.date).getHours();
+      if (hour < 8) early++;
+      if (hour >= 22) late++;
+      const k = dayStart(h.date);
+      if (!days.has(k)) days.set(k, new Set());
+      days.get(k).add(h.exId);
     }
-    return { total, bestSet, bestSession, sessions: hs.length, last: hs[0] || null, streak: streakDays() };
+    return {
+      total, bestSet, bestSession, sessions: hs.length, last: hs[0] || null, streak: streakDays(),
+      longest,                                                     // plus longue séance (s)
+      early, late,                                                 // séances avant 8 h / après 22 h
+      days: days.size,                                             // jours d'entraînement distincts
+      variety: Math.max(0, ...[...days.values()].map(s => s.size)), // max d'exercices différents en un jour
+      tried: new Set(hs.map(h => h.exId)).size,                    // exercices différents essayés
+    };
   }
 
   const dayStart = ts => { const d = new Date(ts); d.setHours(0, 0, 0, 0); return d.getTime(); };
@@ -566,46 +638,114 @@
   }
 
   // ---------- Badges ----------
-  // ex = exercice concerné (stats de cet exercice) ; sans ex = stats globales (séances, streak)
+  // Un badge = atteindre `goal` sur la stat `stat` de computeStats().
+  // ex = exercice concerné (stats de cet exercice) ; sans ex = stats globales.
+  // Les `id` sont des clés de tt.badges : ne jamais les renommer.
+  const B = (id, ex, icon, name, desc, stat, goal) => ({ id, ex, icon, name, desc, stat, goal });
   const BADGES = [
-    { id: 's1',   icon: '🎯', name: 'Premier pas',  desc: '1re séance',              test: s => s.sessions >= 1 },
-    { id: 's10',  icon: '📅', name: 'Habitué·e',    desc: '10 séances',              test: s => s.sessions >= 10 },
-    { id: 's50',  icon: '🏛️', name: 'Pilier',       desc: '50 séances',              test: s => s.sessions >= 50 },
-    { id: 'st3',  icon: '🔥', name: 'En feu',       desc: '3 jours d\'affilée',      test: s => s.streak >= 3 },
-    { id: 'st7',  icon: '☄️', name: 'Semaine pleine', desc: '7 jours d\'affilée',    test: s => s.streak >= 7 },
-    { id: 'st30', icon: '🌋', name: 'Inarrêtable',  desc: '30 jours d\'affilée',     test: s => s.streak >= 30 },
-    { id: 'b5',   ex: 'tractions', icon: '💪', name: 'Série de 5',  desc: '5 tractions d\'affilée',  test: s => s.bestSet >= 5 },
-    { id: 'b10',  ex: 'tractions', icon: '⚡', name: 'Série de 10', desc: '10 tractions d\'affilée', test: s => s.bestSet >= 10 },
-    { id: 'b15',  ex: 'tractions', icon: '🦍', name: 'Série de 15', desc: '15 tractions d\'affilée', test: s => s.bestSet >= 15 },
-    { id: 'b20',  ex: 'tractions', icon: '👑', name: 'Série de 20', desc: '20 tractions d\'affilée', test: s => s.bestSet >= 20 },
-    { id: 'p50',  ex: 'tractions', icon: '🥈', name: 'Demi-siècle', desc: '50 tractions en une séance',  test: s => s.bestSession >= 50 },
-    { id: 'p100', ex: 'tractions', icon: '🏆', name: 'Centenaire',  desc: '100 tractions en une séance', test: s => s.bestSession >= 100 },
-    { id: 't100', ex: 'tractions', icon: '💯', name: 'Centurion',   desc: '100 tractions au total',   test: s => s.total >= 100 },
-    { id: 't500', ex: 'tractions', icon: '🧗', name: 'Grimpeur',    desc: '500 tractions au total',   test: s => s.total >= 500 },
-    { id: 't1k',  ex: 'tractions', icon: '🚀', name: 'Mille',       desc: '1 000 tractions au total', test: s => s.total >= 1000 },
-    { id: 't5k',  ex: 'tractions', icon: '🏔️', name: 'Sommet',      desc: '5 000 tractions au total', test: s => s.total >= 5000 },
-    { id: 'pp50',  ex: 'pompes', icon: '🫸', name: 'Cinquante pompes', desc: '50 pompes en une séance',  test: s => s.bestSession >= 50 },
-    { id: 'pp100', ex: 'pompes', icon: '🛡️', name: 'Cent pompes',      desc: '100 pompes en une séance', test: s => s.bestSession >= 100 },
-    { id: 'pt1k',  ex: 'pompes', icon: '🏋️', name: 'Mille pompes',     desc: '1 000 pompes au total',    test: s => s.total >= 1000 },
-    { id: 'h30',  ex: 'deadhang', icon: '🪝', name: 'Accroché·e',    desc: 'Dead hang de 30 s',  test: s => s.bestSet >= 30 },
-    { id: 'h60',  ex: 'deadhang', icon: '🦇', name: 'Chauve-souris', desc: 'Dead hang de 1 min', test: s => s.bestSet >= 60 },
-    { id: 'h120', ex: 'deadhang', icon: '🐒', name: 'Primate',       desc: 'Dead hang de 2 min', test: s => s.bestSet >= 120 },
-    { id: 'hs5',  ex: 'deadhang', icon: '⏱️', name: '5 min suspendu', desc: '5 min de dead hang en une séance', test: s => s.bestSession >= 300 },
-    { id: 'ht30', ex: 'deadhang', icon: '⏳', name: 'Demi-heure',    desc: '30 min de dead hang au total', test: s => s.total >= 1800 },
+    // Général
+    B('s1',    null, '🎯', 'Premier pas',     '1re séance',                                  'sessions', 1),
+    B('s10',   null, '📅', 'Habitué·e',       '10 séances',                                  'sessions', 10),
+    B('s25',   null, '🎖️', 'Assidu·e',        '25 séances',                                  'sessions', 25),
+    B('s50',   null, '🏛️', 'Pilier',          '50 séances',                                  'sessions', 50),
+    B('s100',  null, '💎', 'Légende',         '100 séances',                                 'sessions', 100),
+    B('st3',   null, '🔥', 'En feu',          '3 jours d\'affilée',                          'streak', 3),
+    B('st7',   null, '☄️', 'Semaine pleine',  '7 jours d\'affilée',                          'streak', 7),
+    B('st14',  null, '⚔️', 'Deux semaines',   '14 jours d\'affilée',                         'streak', 14),
+    B('st30',  null, '🌋', 'Inarrêtable',     '30 jours d\'affilée',                         'streak', 30),
+    B('d30',   null, '📆', 'Un mois de sport', '30 jours d\'entraînement',                   'days', 30),
+    B('d100',  null, '🗓️', 'Cent jours',      '100 jours d\'entraînement',                   'days', 100),
+    B('early', null, '🌅', 'Lève-tôt',        'Une séance avant 8 h',                        'early', 1),
+    B('late',  null, '🌙', 'Oiseau de nuit',  'Une séance après 22 h',                       'late', 1),
+    B('try',   null, '🧭', 'Explorateur·rice', `Essayer les ${exercises.length} exercices`,  'tried', exercises.length),
+    B('poly3', null, '🎨', 'Polyvalent·e',    '3 exercices différents le même jour',         'variety', 3),
+    B('poly4', null, '🧩', 'Grand chelem',    `Les ${exercises.length} exercices le même jour`, 'variety', exercises.length),
+    B('long',  null, '⌛', 'Endurance',       'Une séance de 20 min',                        'longest', 1200),
+    // Tractions
+    B('b5',    'tractions', '💪', 'Série de 5',   '5 tractions d\'affilée',      'bestSet', 5),
+    B('b10',   'tractions', '⚡', 'Série de 10',  '10 tractions d\'affilée',     'bestSet', 10),
+    B('b15',   'tractions', '🦍', 'Série de 15',  '15 tractions d\'affilée',     'bestSet', 15),
+    B('b20',   'tractions', '👑', 'Série de 20',  '20 tractions d\'affilée',     'bestSet', 20),
+    B('p30',   'tractions', '🥉', 'Trentaine',    '30 tractions en une séance',  'bestSession', 30),
+    B('p50',   'tractions', '🥈', 'Demi-siècle',  '50 tractions en une séance',  'bestSession', 50),
+    B('p100',  'tractions', '🏆', 'Centenaire',   '100 tractions en une séance', 'bestSession', 100),
+    B('t100',  'tractions', '💯', 'Centurion',    '100 tractions au total',      'total', 100),
+    B('t500',  'tractions', '🧗', 'Grimpeur',     '500 tractions au total',      'total', 500),
+    B('t1k',   'tractions', '🚀', 'Mille',        '1 000 tractions au total',    'total', 1000),
+    B('t5k',   'tractions', '🏔️', 'Sommet',       '5 000 tractions au total',    'total', 5000),
+    B('tse10', 'tractions', '🪜', 'Échelle rodée', '10 séances de tractions',    'sessions', 10),
+    // Pompes
+    B('pp50',  'pompes', '🫸', 'Cinquante pompes', '50 pompes en une séance',  'bestSession', 50),
+    B('pp100', 'pompes', '🛡️', 'Cent pompes',      '100 pompes en une séance', 'bestSession', 100),
+    B('pp150', 'pompes', '🔩', 'Bras d\'acier',    '150 pompes en une séance', 'bestSession', 150),
+    B('pt500', 'pompes', '🧱', 'Cinq cents',       '500 pompes au total',      'total', 500),
+    B('pt1k',  'pompes', '🏋️', 'Mille pompes',     '1 000 pompes au total',    'total', 1000),
+    B('pt5k',  'pompes', '🗿', 'Roc',              '5 000 pompes au total',    'total', 5000),
+    B('pse10', 'pompes', '📈', 'Rituel',           '10 séances de pompes',     'sessions', 10),
+    // Dead hang
+    B('h30',   'deadhang', '🪝', 'Accroché·e',     'Tenir 30 s',                  'bestSet', 30),
+    B('h45',   'deadhang', '🧲', 'Poigne',         'Tenir 45 s',                  'bestSet', 45),
+    B('h60',   'deadhang', '🦇', 'Chauve-souris',  'Tenir 1 min',                 'bestSet', 60),
+    B('h90',   'deadhang', '🦥', 'Paresseux',      'Tenir 1 min 30',              'bestSet', 90),
+    B('h120',  'deadhang', '🐒', 'Primate',        'Tenir 2 min',                 'bestSet', 120),
+    B('hs5',   'deadhang', '⏱️', '5 min suspendu', '5 min en une séance',         'bestSession', 300),
+    B('ht30',  'deadhang', '⏳', 'Demi-heure',     '30 min au total',             'total', 1800),
+    B('hse10', 'deadhang', '🤲', 'Mains de fer',   '10 séances de dead hang',     'sessions', 10),
+    // L-sit hang
+    B('l10',   'lsit', '🪑', 'Chaise vide',     'Tenir 10 s',              'bestSet', 10),
+    B('l15',   'lsit', '📐', 'Équerre',         'Tenir 15 s',              'bestSet', 15),
+    B('l20',   'lsit', '🔺', 'Angle droit',     'Tenir 20 s',              'bestSet', 20),
+    B('l30',   'lsit', '🧱', 'Abdos d\'acier',  'Tenir 30 s',              'bestSet', 30),
+    B('l45',   'lsit', '🗡️', 'Lame',            'Tenir 45 s',              'bestSet', 45),
+    B('l60',   'lsit', '🏯', 'Maître du L',     'Tenir 1 min',             'bestSet', 60),
+    B('ls60',  'lsit', '⏲️', 'Minute gainée',   '1 min en une séance',     'bestSession', 60),
+    B('lt10',  'lsit', '🧘', 'Zen',             '10 min au total',         'total', 600),
+    B('lse10', 'lsit', '🎋', 'Discipline',      '10 séances de L-sit',     'sessions', 10),
   ];
+
+  const statsCache = () => { const c = {}; return ex => (c[ex || '*'] ||= computeStats(ex || null)); };
+  const badgeValue = (b, s) => s[b.stat] || 0;
+  const badgeProgress = (b, s) => Math.min(1, badgeValue(b, s) / b.goal);
+
+  // Valeur lisible pour la progression d'un badge (« 45 s », « 12 », « 3:20 »)
+  function fmtBadgeValue(b, v) {
+    if (b.stat === 'longest') return fmt(v);
+    const ex = b.ex && exById(b.ex);
+    return ex && ['total', 'bestSet', 'bestSession'].includes(b.stat) ? fmtNum(ex, v) : String(v);
+  }
 
   // Débloque les badges atteints ; renvoie ceux qui viennent de l'être.
   function checkBadges() {
-    const cache = {};
-    const statsFor = ex => (cache[ex || '*'] ||= computeStats(ex || null));
-    const fresh = BADGES.filter(b => !unlocked[b.id] && b.test(statsFor(b.ex)));
+    const statsFor = statsCache();
+    const fresh = BADGES.filter(b => !unlocked[b.id] && badgeValue(b, statsFor(b.ex)) >= b.goal);
     fresh.forEach(b => { unlocked[b.id] = Date.now(); });
     if (fresh.length) store.set('tt.badges', unlocked);
     return fresh;
   }
 
-  const badgeHtml = (b, on) =>
-    `<div class="badge ${on ? 'on' : 'off'}" title="${escapeHtml(b.desc)}"><span class="ic">${b.icon}</span><b>${escapeHtml(b.name)}</b><small>${escapeHtml(b.desc)}</small></div>`;
+  // Carte de badge ; s = stats correspondantes (pour la barre de progression des badges verrouillés)
+  function badgeHtml(b, s) {
+    const on = !!unlocked[b.id];
+    let foot = '';
+    if (on) {
+      foot = `<div class="date">✓ ${new Date(unlocked[b.id]).toLocaleDateString('fr-FR')}</div>`;
+    } else if (s) {
+      const v = badgeValue(b, s);
+      foot = `<div class="pbar"><div style="width:${Math.round(badgeProgress(b, s) * 100)}%"></div></div>` +
+        `<div class="prog">${escapeHtml(fmtBadgeValue(b, Math.min(v, b.goal)))} / ${escapeHtml(fmtBadgeValue(b, b.goal))}</div>`;
+    }
+    return `<div class="badge ${on ? 'on' : 'off'}" title="${escapeHtml(b.desc)}"><span class="ic">${b.icon}</span>` +
+      `<b>${escapeHtml(b.name)}</b><small>${escapeHtml(b.desc)}</small>${foot}</div>`;
+  }
+
+  // Petite pastille (badge gagné) pour les cartes d'exercice et le bandeau streak
+  const badgeChip = b => `<span class="chip" title="${escapeHtml(b.name + ' — ' + b.desc)}">${b.icon}</span>`;
+
+  // Badge verrouillé le plus proche d'être atteint (parmi une liste)
+  function nextBadge(list, s) {
+    return list.filter(b => !unlocked[b.id])
+      .sort((a, b) => badgeProgress(b, s) - badgeProgress(a, s) || a.goal - b.goal)[0] || null;
+  }
 
   // ---------- Messages d'encouragement ----------
   const ENCOURAGEMENTS = [
@@ -658,15 +798,18 @@
   // ---------- Éléments ----------
   const $ = id => document.getElementById(id);
   const el = {
-    homeView: $('homeView'), exView: $('exView'), exList: $('exList'),
+    homeView: $('homeView'), exView: $('exView'), badgesView: $('badgesView'), exList: $('exList'),
+    globalBadges: $('globalBadges'),
+    bgCount: $('bgCount'), bgTotal: $('bgTotal'), bgBar: $('bgBar'), bgMsg: $('bgMsg'),
+    bgNextWrap: $('bgNextWrap'), bgNext: $('bgNext'), bgGroups: $('bgGroups'),
     greet: $('greet'), streak: $('streak'), streakNum: $('streakNum'), streakLabel: $('streakLabel'), streakMsg: $('streakMsg'),
-    badges: $('badges'), badgeCount: $('badgeCount'), history: $('history'),
+    badgeCount: $('badgeCount'), history: $('history'),
     exTitle: $('exTitle'), exStart: $('exStart'), exInc: $('exInc'), exRest: $('exRest'),
     lblStart: $('lblStart'), lblInc: $('lblInc'), hint: $('hint'),
     sessionCard: $('sessionCard'), stage: $('stage'),
     goPanel: $('goPanel'), goKicker: $('goKicker'), goNum: $('goNum'), goUnit: $('goUnit'),
     restPanel: $('restPanel'), ringFg: $('ringFg'), restLabel: $('restLabel'), time: $('time'), nextLabel: $('nextLabel'),
-    coach: $('coach'), mainBtn: $('mainBtn'), finishBtn: $('finishBtn'),
+    coach: $('coach'), mainBtn: $('mainBtn'), finishBtn: $('finishBtn'), failBtn: $('failBtn'),
     restControls: $('restControls'), minus: $('minus'), plus: $('plus'), pauseBtn: $('pauseBtn'),
     liveTotal: $('liveTotal'), liveTotalLabel: $('liveTotalLabel'), stairs: $('stairs'),
     recap: $('recap'), recapMsg: $('recapMsg'), sumReps: $('sumReps'), sumRepsLabel: $('sumRepsLabel'), sumCompare: $('sumCompare'),
@@ -679,9 +822,9 @@
   el.ringFg.style.strokeDasharray = RING_C;
 
   // ---------- Navigation ----------
-  // Routes par hash : '#/' = accueil, '#/ex/<id>' = page de l'exercice.
+  // Routes par hash : '#/' = accueil, '#/ex/<id>' = page de l'exercice, '#/badges' = badges.
   // Le bouton « précédent » du navigateur fonctionne donc aussi.
-  let view = null; // 'home' | 'ex'
+  let view = null; // 'home' | 'ex' | 'badges'
   const exHash = id => '#/ex/' + encodeURIComponent(id);
 
   function route() {
@@ -695,30 +838,45 @@
       return;
     }
     if (target) showExercise(target);
+    else if (location.hash === '#/badges') showBadges();
     else showHome();
   }
 
-  function showHome() {
-    view = 'home';
-    stopTimer();
-    stopBlink();
-    session = null;
-    renderHome();
-    el.exView.hidden = true;
-    el.homeView.hidden = false;
-    document.title = baseTitle;
+  function setView(name) {
+    view = name;
+    el.homeView.hidden = name !== 'home';
+    el.exView.hidden = name !== 'ex';
+    el.badgesView.hidden = name !== 'badges';
     window.scrollTo(0, 0);
   }
 
+  // Quitte la page exercice : arrête le timer et efface la séance
+  function leaveSession() {
+    stopTimer();
+    stopBlink();
+    session = null;
+  }
+
+  function showHome() {
+    leaveSession();
+    renderHome();
+    setView('home');
+    document.title = baseTitle;
+  }
+
+  function showBadges() {
+    leaveSession();
+    renderBadges();
+    setView('badges');
+    document.title = 'Badges — ' + baseTitle;
+  }
+
   function showExercise(id) {
-    view = 'ex';
     activeId = id;
     saveEx();
     renderSettings();
     newSession();
-    el.homeView.hidden = true;
-    el.exView.hidden = false;
-    window.scrollTo(0, 0);
+    setView('ex');
   }
 
   // ---------- Séance ----------
@@ -897,6 +1055,20 @@
 
   // Fin de l'exercice : si on est en train de faire une série (phase 'go'),
   // c'est la dernière série → elle est comptée. Pendant une pause, rien à ajouter.
+  // « Je n'ai pas réussi » (exercice tenu, pendant prep/hold) : l'essai en cours n'est pas
+  // compté et la séance se termine avec les séries déjà validées.
+  function failAttempt() {
+    if (!session || !(session.phase === 'prep' || session.phase === 'hold')) return;
+    stopTimer();
+    session.phase = 'go';
+    if (!session.reps.length) {
+      session.coach = 'Pas de série validée, rien n\'est enregistré. Repose-toi et réessaie !';
+      render();
+      return;
+    }
+    finish(); // en phase 'go' d'un exercice chronométré, finish() n'ajoute rien
+  }
+
   // Exercice chronométré : en 'go' la série n'a pas été faite → rien à ajouter ;
   // en 'hold' on compte la durée tenue ; en 'prep' on annule le départ.
   function finish() {
@@ -979,6 +1151,10 @@
     };
     el.mainBtn.textContent = labels[phase] || '';
     el.mainBtn.className = phase === 'go' ? 'btn-go' : 'btn-skip';
+    // Exercice tenu : pendant la préparation/l'effort, « Je n'ai pas réussi » remplace « Fin de l'exercice »
+    const attempt = timed && (phase === 'prep' || phase === 'hold');
+    el.failBtn.hidden = !attempt;
+    el.finishBtn.hidden = attempt;
     el.finishBtn.disabled = timed && phase === 'go' && !session.reps.length;
     el.restControls.hidden = !resting;
     el.pauseBtn.textContent = paused ? '▶ Reprendre' : '⏸ Pause';
@@ -1043,7 +1219,7 @@
     el.sumRecords.innerHTML = ribbons.map(r => `<div class="ribbon">${escapeHtml(r)}</div>`).join('');
 
     el.sumBadgesWrap.hidden = !fresh.length;
-    el.sumBadges.innerHTML = fresh.map(b => badgeHtml(b, true)).join('');
+    el.sumBadges.innerHTML = fresh.map(b => badgeHtml(b)).join('');
 
     const st = streakDays();
     el.sumStreak.textContent = `🔥 ${plural(st, 'jour')} d'affilée`;
@@ -1095,17 +1271,63 @@
           `<div class="gold"><b>${n(st.bestSession)}</b><span>meilleure séance</span></div>` +
           `<div><b>${st.sessions}</b><span>séances</span></div>` +
         `</div>` +
+        exBadgesHtml(e, st) +
         `<span class="cta">C'est parti →</span>`;
       b.addEventListener('click', () => { location.hash = exHash(e.id); });
       el.exList.appendChild(b);
     }
 
-    // Badges
-    const n = BADGES.filter(b => unlocked[b.id]).length;
-    el.badgeCount.textContent = `${n} / ${BADGES.length} débloqués`;
-    el.badges.innerHTML = BADGES.map(b => badgeHtml(b, !!unlocked[b.id])).join('');
+    // Badges : compteur (lien vers la page) + badges généraux gagnés dans le bandeau streak
+    el.badgeCount.textContent = `${BADGES.filter(b => unlocked[b.id]).length} / ${BADGES.length}`;
+    el.globalBadges.innerHTML = BADGES.filter(b => !b.ex && unlocked[b.id]).map(badgeChip).join('');
 
     renderHistory();
+  }
+
+  // Badges gagnés de l'exercice (pastilles) + le prochain à décrocher
+  function exBadgesHtml(e, st) {
+    const list = BADGES.filter(b => b.ex === e.id);
+    const won = list.filter(b => unlocked[b.id]);
+    const next = nextBadge(list, st);
+    const nextHtml = next
+      ? `<span class="next">${won.length ? 'Prochain' : 'Premier badge'} : ${next.icon} <b>${escapeHtml(next.desc)}</b> · ` +
+        `${escapeHtml(fmtBadgeValue(next, Math.min(badgeValue(next, st), next.goal)))} / ${escapeHtml(fmtBadgeValue(next, next.goal))}</span>`
+      : `<span class="next">Tous les badges décrochés 👑</span>`;
+    return `<div class="ex-badges">${won.map(badgeChip).join('')}${nextHtml}</div>`;
+  }
+
+  function renderBadges() {
+    const statsFor = statsCache();
+    const n = BADGES.filter(b => unlocked[b.id]).length;
+    const ratio = n / BADGES.length;
+    el.bgCount.textContent = n;
+    el.bgTotal.textContent = `/ ${BADGES.length} débloqués`;
+    el.bgBar.style.width = Math.round(ratio * 100) + '%';
+    el.bgMsg.textContent =
+      n === 0 ? 'Ta collection est vide pour l\'instant : une première séance et le premier badge tombe !'
+      : ratio < .25 ? 'Belle entrée en matière. Chaque séance te rapproche du prochain.'
+      : ratio < .5 ? 'Ta collection prend forme, continue comme ça !'
+      : ratio < .75 ? 'Plus de la moitié ! Les derniers sont les plus durs… et les plus beaux.'
+      : ratio < 1 ? 'Presque tout ! Il ne reste que les badges des vrais monstres.'
+      : 'Collection complète. Légendaire. 👑';
+
+    // Prochains objectifs : les badges verrouillés les plus avancés
+    const next = BADGES.filter(b => !unlocked[b.id])
+      .map(b => ({ b, p: badgeProgress(b, statsFor(b.ex)) }))
+      .sort((x, y) => y.p - x.p)
+      .slice(0, 4);
+    el.bgNextWrap.hidden = !next.length;
+    el.bgNext.innerHTML = next.map(({ b }) => badgeHtml(b, statsFor(b.ex))).join('');
+
+    // Une section par groupe : général puis chaque exercice
+    const groups = [{ id: null, name: 'Général' }, ...exercises.map(e => ({ id: e.id, name: e.name }))];
+    el.bgGroups.innerHTML = groups.map(g => {
+      const list = BADGES.filter(b => (b.ex || null) === g.id);
+      const won = list.filter(b => unlocked[b.id]).length;
+      return `<section class="card bg-group"><div class="section-head"><h2>${escapeHtml(g.name)}</h2>` +
+        `<small>${won} / ${list.length}</small></div>` +
+        `<div class="badges">${list.map(b => badgeHtml(b, statsFor(b.ex))).join('')}</div></section>`;
+    }).join('');
   }
 
   function renderSettings() {
@@ -1261,9 +1483,13 @@
   el.plus.addEventListener('click', () => adjust(15));
   el.pauseBtn.addEventListener('click', togglePause);
   el.finishBtn.addEventListener('click', finish);
+  el.failBtn.addEventListener('click', failAttempt);
   $('newSession').addEventListener('click', newSession);
   $('backBtn').addEventListener('click', () => { location.hash = '#/'; });
   $('homeBtn').addEventListener('click', () => { location.hash = '#/'; });
+  $('badgesBtn').addEventListener('click', () => { location.hash = '#/badges'; });
+  $('badgesBack').addEventListener('click', () => { location.hash = '#/'; });
+  $('sumBadgesLink').addEventListener('click', () => { location.hash = '#/badges'; });
   window.addEventListener('hashchange', route);
 
   document.addEventListener('keydown', e => {
