@@ -1,0 +1,485 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Timer de pause</title>
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --card: #ffffff;
+    --text: #1d2330;
+    --muted: #6b7385;
+    --border: #dde1e8;
+    --accent: #2f6fed;
+    --accent-text: #ffffff;
+    --go: #1f9d55;
+    --rest: #e07b1a;
+    --danger: #c93b3b;
+    --track: #e6e9ef;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12151b;
+      --card: #1b1f27;
+      --text: #e8ebf1;
+      --muted: #949cad;
+      --border: #2c323d;
+      --accent: #5b8cff;
+      --accent-text: #0d1117;
+      --go: #3ccf7a;
+      --rest: #f39a42;
+      --danger: #ef6b6b;
+      --track: #2a303b;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  main { max-width: 760px; margin: 0 auto; padding: 24px 16px 48px; }
+  h1 { font-size: 1.4rem; margin: 0 0 16px; }
+  h2 { font-size: 1.05rem; margin: 0 0 12px; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 16px;
+  }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; }
+  label { display: flex; flex-direction: column; font-size: .8rem; color: var(--muted); gap: 4px; }
+  input, select {
+    font: inherit;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 7px 10px;
+  }
+  input[type=number] { width: 90px; }
+  input[type=text] { width: 180px; }
+  button {
+    font: inherit;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 8px 14px;
+    cursor: pointer;
+  }
+  button:hover { border-color: var(--muted); }
+  button.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); font-weight: 600; }
+  button.danger { color: var(--danger); }
+  button:disabled { opacity: .45; cursor: default; }
+
+  .session { text-align: center; }
+  .set-label { font-size: 1.1rem; color: var(--muted); margin: 0; }
+  .reps { font-size: 2rem; font-weight: 700; margin: 4px 0 8px; }
+  .status { font-weight: 600; letter-spacing: .04em; text-transform: uppercase; font-size: .85rem; }
+  .status.go { color: var(--go); }
+  .status.rest { color: var(--rest); }
+  .clock {
+    font-size: clamp(4rem, 18vw, 8rem);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+    margin: 6px 0 12px;
+  }
+  .clock.go { color: var(--go); }
+  .bar { height: 10px; background: var(--track); border-radius: 99px; overflow: hidden; margin: 0 auto 18px; max-width: 520px; }
+  .bar > div { height: 100%; width: 0; background: var(--rest); transition: width .2s linear; }
+  .big { font-size: 1.25rem; padding: 14px 28px; }
+  .controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 12px; }
+  .hint { color: var(--muted); font-size: .85rem; margin-top: 10px; }
+  .done-list { color: var(--muted); font-size: .9rem; margin-top: 14px; }
+
+  .summary { display: none; }
+  .summary.show { display: block; }
+  .stats { display: flex; flex-wrap: wrap; gap: 24px; justify-content: center; margin: 8px 0 14px; }
+  .stat b { display: block; font-size: 1.8rem; font-variant-numeric: tabular-nums; }
+  .stat span { color: var(--muted); font-size: .85rem; }
+
+  table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+  th, td { text-align: left; padding: 6px 4px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-weight: 500; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .empty { color: var(--muted); font-size: .9rem; }
+  .head { display: flex; justify-content: space-between; align-items: center; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Timer de pause</h1>
+
+  <section class="card">
+    <h2>Exercice</h2>
+    <div class="row">
+      <label>Exercice actif
+        <select id="exSelect"></select>
+      </label>
+      <button id="addEx">+ Ajouter</button>
+      <button id="delEx" class="danger">Supprimer</button>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <label>Nom <input type="text" id="exName"></label>
+      <label>Reps série 1 <input type="number" id="exStart" min="1" step="1"></label>
+      <label>+ par série <input type="number" id="exInc" min="0" step="1"></label>
+      <label>Pause (s) <input type="number" id="exRest" min="5" step="5"></label>
+    </div>
+  </section>
+
+  <section class="card session" id="sessionCard">
+    <p class="set-label" id="setLabel">Série 1</p>
+    <div class="reps" id="repsLabel">1 répétition</div>
+    <div class="status go" id="status">À toi !</div>
+    <div class="clock go" id="clock">GO</div>
+    <div class="bar"><div id="bar"></div></div>
+
+    <button class="primary big" id="mainBtn">Série terminée</button>
+    <div class="controls">
+      <button id="minus">−15 s</button>
+      <button id="plus">+15 s</button>
+      <button id="pauseBtn">Pause</button>
+      <button id="finishBtn">Terminer l'exercice</button>
+    </div>
+    <div class="hint">Espace = action principale</div>
+    <div class="done-list" id="doneList"></div>
+  </section>
+
+  <section class="card session summary" id="summary">
+    <h2 id="sumTitle">Récap</h2>
+    <div class="stats">
+      <div class="stat"><b id="sumSets">0</b><span>séries</span></div>
+      <div class="stat"><b id="sumReps">0</b><span>répétitions</span></div>
+      <div class="stat"><b id="sumTime">0:00</b><span>durée</span></div>
+    </div>
+    <button class="primary" id="newSession">Nouvelle séance</button>
+  </section>
+
+  <section class="card">
+    <div class="head">
+      <h2>Historique</h2>
+      <button id="clearHist" class="danger">Effacer</button>
+    </div>
+    <div id="history"></div>
+  </section>
+</main>
+
+<script>
+(() => {
+  // ---------- Stockage ----------
+  const store = {
+    get(key, fallback) {
+      try {
+        const v = localStorage.getItem(key);
+        return v ? JSON.parse(v) : fallback;
+      } catch { return fallback; }
+    },
+    set(key, value) {
+      try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
+    }
+  };
+
+  const DEFAULT_EX = [{ id: 'tractions', name: 'Tractions', start: 1, inc: 1, rest: 90 }];
+  let exercises = store.get('tt.exercises', DEFAULT_EX);
+  if (!Array.isArray(exercises) || !exercises.length) exercises = DEFAULT_EX;
+  let activeId = store.get('tt.active', exercises[0].id);
+  if (!exercises.some(e => e.id === activeId)) activeId = exercises[0].id;
+  let history = store.get('tt.history', []);
+
+  const saveEx = () => { store.set('tt.exercises', exercises); store.set('tt.active', activeId); };
+  const active = () => exercises.find(e => e.id === activeId);
+
+  // ---------- Éléments ----------
+  const $ = id => document.getElementById(id);
+  const el = {
+    exSelect: $('exSelect'), exName: $('exName'), exStart: $('exStart'), exInc: $('exInc'), exRest: $('exRest'),
+    setLabel: $('setLabel'), repsLabel: $('repsLabel'), status: $('status'), clock: $('clock'), bar: $('bar'),
+    mainBtn: $('mainBtn'), minus: $('minus'), plus: $('plus'), pauseBtn: $('pauseBtn'), finishBtn: $('finishBtn'),
+    doneList: $('doneList'), sessionCard: $('sessionCard'), summary: $('summary'),
+    sumTitle: $('sumTitle'), sumSets: $('sumSets'), sumReps: $('sumReps'), sumTime: $('sumTime'),
+    history: $('history')
+  };
+
+  // ---------- Séance ----------
+  // phase: 'go' (en train de faire la série) | 'rest' (pause en cours) | 'done' (récap)
+  let session;
+  const timer = { endAt: 0, total: 0, remainingWhenPaused: null, tick: null };
+
+  function newSession() {
+    stopTimer();
+    session = { set: 1, reps: [], startedAt: null, phase: 'go' };
+    el.summary.classList.remove('show');
+    el.sessionCard.style.display = '';
+    render();
+  }
+
+  const repsFor = n => { const e = active(); return e.start + (n - 1) * e.inc; };
+
+  function setDone() {
+    if (session.startedAt === null) session.startedAt = Date.now();
+    session.reps.push(repsFor(session.set));
+    session.set++;
+    startRest();
+  }
+
+  function startRest() {
+    session.phase = 'rest';
+    timer.total = active().rest * 1000;
+    timer.endAt = Date.now() + timer.total;
+    timer.remainingWhenPaused = null;
+    runTick();
+    render();
+  }
+
+  function runTick() {
+    clearInterval(timer.tick);
+    timer.tick = setInterval(update, 200);
+    update();
+  }
+
+  function stopTimer() {
+    clearInterval(timer.tick);
+    timer.tick = null;
+    timer.remainingWhenPaused = null;
+  }
+
+  const remaining = () => timer.remainingWhenPaused ?? Math.max(0, timer.endAt - Date.now());
+
+  function update() {
+    if (session.phase !== 'rest') return;
+    const r = remaining();
+    el.clock.textContent = fmt(Math.ceil(r / 1000));
+    el.bar.style.width = (100 * (1 - r / timer.total)) + '%';
+    if (r <= 0) endRest(true);
+  }
+
+  function endRest(alert) {
+    stopTimer();
+    session.phase = 'go';
+    if (alert) { beep(); blinkTitle(); }
+    render();
+  }
+
+  function adjust(sec) {
+    if (session.phase !== 'rest') return;
+    const d = sec * 1000;
+    timer.total = Math.max(1000, timer.total + d);
+    if (timer.remainingWhenPaused !== null) {
+      timer.remainingWhenPaused = Math.max(0, timer.remainingWhenPaused + d);
+      if (timer.remainingWhenPaused === 0) return endRest(true);
+    } else {
+      timer.endAt += d;
+    }
+    update();
+  }
+
+  function togglePause() {
+    if (session.phase !== 'rest') return;
+    if (timer.remainingWhenPaused === null) {
+      timer.remainingWhenPaused = remaining();
+      clearInterval(timer.tick);
+    } else {
+      timer.endAt = Date.now() + timer.remainingWhenPaused;
+      timer.remainingWhenPaused = null;
+      runTick();
+    }
+    render();
+  }
+
+  function finish() {
+    if (!session.reps.length) return;
+    stopTimer();
+    session.phase = 'done';
+    const total = session.reps.reduce((a, b) => a + b, 0);
+    const dur = Math.round((Date.now() - session.startedAt) / 1000);
+    history.unshift({ date: Date.now(), name: active().name, sets: session.reps.length, reps: total, dur });
+    history = history.slice(0, 200);
+    store.set('tt.history', history);
+
+    el.sumTitle.textContent = 'Récap — ' + active().name;
+    el.sumSets.textContent = session.reps.length;
+    el.sumReps.textContent = total;
+    el.sumTime.textContent = fmt(dur);
+    el.sessionCard.style.display = 'none';
+    el.summary.classList.add('show');
+    renderHistory();
+  }
+
+  // ---------- Rendu ----------
+  const fmt = s => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+  const plural = (n, w) => `${n} ${w}${n > 1 ? 's' : ''}`;
+
+  function render() {
+    const reps = repsFor(session.set);
+    el.setLabel.textContent = `Série ${session.set}`;
+    el.repsLabel.textContent = plural(reps, 'répétition');
+    const resting = session.phase === 'rest';
+    const paused = timer.remainingWhenPaused !== null;
+
+    el.status.className = 'status ' + (resting ? 'rest' : 'go');
+    el.status.textContent = resting ? (paused ? 'Pause (en attente)' : 'Récupération') : 'À toi !';
+    el.clock.className = 'clock' + (resting ? '' : ' go');
+    if (!resting) { el.clock.textContent = 'GO'; el.bar.style.width = '0%'; }
+    else update();
+
+    el.mainBtn.textContent = resting ? 'Passer la pause' : 'Série terminée';
+    el.minus.disabled = el.plus.disabled = el.pauseBtn.disabled = !resting;
+    el.pauseBtn.textContent = paused ? 'Reprendre' : 'Pause';
+    el.finishBtn.disabled = !session.reps.length;
+
+    el.doneList.textContent = session.reps.length
+      ? `Fait : ${session.reps.join(' + ')} = ${session.reps.reduce((a, b) => a + b, 0)}`
+      : '';
+  }
+
+  function renderExercises() {
+    el.exSelect.innerHTML = '';
+    for (const e of exercises) {
+      const o = document.createElement('option');
+      o.value = e.id; o.textContent = e.name || '(sans nom)';
+      if (e.id === activeId) o.selected = true;
+      el.exSelect.appendChild(o);
+    }
+    const a = active();
+    el.exName.value = a.name;
+    el.exStart.value = a.start;
+    el.exInc.value = a.inc;
+    el.exRest.value = a.rest;
+    $('delEx').disabled = exercises.length < 2;
+  }
+
+  function renderHistory() {
+    if (!history.length) { el.history.innerHTML = '<p class="empty">Aucune séance enregistrée.</p>'; return; }
+    const rows = history.slice(0, 10).map(h => {
+      const d = new Date(h.date).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' });
+      return `<tr><td>${d}</td><td>${escapeHtml(h.name)}</td><td class="num">${h.sets}</td><td class="num">${h.reps}</td><td class="num">${fmt(h.dur)}</td></tr>`;
+    }).join('');
+    el.history.innerHTML = `<table><thead><tr><th>Date</th><th>Exercice</th><th class="num">Séries</th><th class="num">Reps</th><th class="num">Durée</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }
+
+  const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  // ---------- Son & titre ----------
+  let audioCtx;
+  function ensureAudio() {
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+    } catch {}
+  }
+  function beep() {
+    if (!audioCtx) return;
+    const t0 = audioCtx.currentTime;
+    [0, 0.3, 0.6].forEach((off, i) => {
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.frequency.value = i === 2 ? 1320 : 880;
+      g.gain.setValueAtTime(0.0001, t0 + off);
+      g.gain.exponentialRampToValueAtTime(0.4, t0 + off + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + off + 0.22);
+      o.connect(g).connect(audioCtx.destination);
+      o.start(t0 + off);
+      o.stop(t0 + off + 0.25);
+    });
+  }
+
+  const baseTitle = document.title;
+  let blink = null;
+  function blinkTitle() {
+    stopBlink();
+    let on = false;
+    blink = setInterval(() => { document.title = (on = !on) ? '⏰ GO !' : baseTitle; }, 700);
+    document.title = '⏰ GO !';
+  }
+  function stopBlink() {
+    if (blink) { clearInterval(blink); blink = null; document.title = baseTitle; }
+  }
+  window.addEventListener('focus', () => { if (document.hasFocus()) setTimeout(stopBlink, 3000); });
+  document.addEventListener('pointerdown', stopBlink);
+
+  // ---------- Événements ----------
+  function mainAction() {
+    ensureAudio();
+    stopBlink();
+    if (session.phase === 'go') setDone();
+    else if (session.phase === 'rest') endRest(false);
+  }
+
+  el.mainBtn.addEventListener('click', mainAction);
+  el.minus.addEventListener('click', () => adjust(-15));
+  el.plus.addEventListener('click', () => adjust(15));
+  el.pauseBtn.addEventListener('click', togglePause);
+  el.finishBtn.addEventListener('click', finish);
+  $('newSession').addEventListener('click', newSession);
+
+  document.addEventListener('keydown', e => {
+    if (e.code !== 'Space') return;
+    const tag = document.activeElement && document.activeElement.tagName;
+    if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+    e.preventDefault();
+    if (session.phase === 'done') newSession();
+    else mainAction();
+  });
+
+  const confirmAbandon = () => !session.reps.length || session.phase === 'done'
+    || confirm('Une séance est en cours. L\'abandonner ?');
+
+  el.exSelect.addEventListener('change', () => {
+    if (!confirmAbandon()) { el.exSelect.value = activeId; return; }
+    activeId = el.exSelect.value;
+    saveEx(); renderExercises(); newSession();
+  });
+
+  $('addEx').addEventListener('click', () => {
+    if (!confirmAbandon()) return;
+    const e = { id: 'ex' + Date.now(), name: 'Nouvel exercice', start: 10, inc: 0, rest: 90 };
+    exercises.push(e);
+    activeId = e.id;
+    saveEx(); renderExercises(); newSession();
+    el.exName.focus(); el.exName.select();
+  });
+
+  $('delEx').addEventListener('click', () => {
+    if (exercises.length < 2) return;
+    if (!confirm(`Supprimer « ${active().name} » ?`)) return;
+    exercises = exercises.filter(e => e.id !== activeId);
+    activeId = exercises[0].id;
+    saveEx(); renderExercises(); newSession();
+  });
+
+  const intField = (input, key, min) => input.addEventListener('input', () => {
+    const v = parseInt(input.value, 10);
+    if (Number.isNaN(v) || v < min) return;
+    active()[key] = v;
+    saveEx();
+    if (session.phase !== 'done') render();
+  });
+  intField(el.exStart, 'start', 1);
+  intField(el.exInc, 'inc', 0);
+  intField(el.exRest, 'rest', 1);
+  el.exName.addEventListener('input', () => {
+    active().name = el.exName.value;
+    el.exSelect.options[el.exSelect.selectedIndex].textContent = el.exName.value || '(sans nom)';
+    saveEx();
+  });
+
+  $('clearHist').addEventListener('click', () => {
+    if (!history.length || !confirm('Effacer tout l\'historique ?')) return;
+    history = [];
+    store.set('tt.history', history);
+    renderHistory();
+  });
+
+  // ---------- Init ----------
+  renderExercises();
+  renderHistory();
+  newSession();
+})();
+</script>
+</body>
+</html>
