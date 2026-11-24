@@ -398,6 +398,76 @@
   .toast.show { transform: translate(-50%, 0); visibility: visible; transition: transform .35s cubic-bezier(.2, 1.4, .4, 1); }
   #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 19; }
 
+  /* ===== Données & social ===== */
+  .storage-warn { background: rgba(255, 77, 94, .12); border: 1px solid var(--danger); color: var(--text); border-radius: var(--radius); padding: 12px 16px; margin-bottom: 16px; }
+  .hist-tools { display: flex; flex-wrap: wrap; gap: 2px; justify-content: flex-end; }
+  .hero-links { display: flex; flex-wrap: wrap; gap: 10px; }
+  .friends-link {
+    font-family: var(--display); font-weight: 700; font-size: 1.25rem; letter-spacing: .02em;
+    color: var(--go); border-color: rgba(61, 255, 138, .35);
+    background: linear-gradient(180deg, rgba(61, 255, 138, .08), transparent), var(--card);
+    padding: 10px 18px;
+  }
+  .friends-link:hover { border-color: var(--go); box-shadow: 0 6px 30px rgba(61, 255, 138, .12); }
+  .social-status { font-family: system-ui, sans-serif; font-weight: 400; font-size: .8rem; color: var(--muted); letter-spacing: 0; }
+  .hist-actions { margin-left: auto; display: inline-flex; gap: 6px; align-items: center; }
+  .hist-actions button { padding: 4px 10px; font-size: .82rem; border-radius: 9px; }
+  .hist-actions .sent { color: var(--go); font-size: .82rem; }
+  .btn-send { color: var(--go); border-color: rgba(61, 255, 138, .45); }
+  .btn-send.upd { color: var(--rest); border-color: rgba(255, 159, 28, .5); }
+  .recap-social { margin-top: 18px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .recap-social p { margin: 0; color: var(--muted); font-size: .9rem; }
+  .recap-social .btn-send { font-weight: 600; }
+  input.wide { width: 300px; max-width: 100%; }
+  .form-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; margin-top: 12px; }
+  .form-msg { min-height: 1.4em; margin: 10px 0 0; font-size: .9rem; color: var(--muted); }
+  .form-msg.err { color: var(--danger); }
+  .form-msg.ok { color: var(--go); }
+  .avatars { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .avatars button { width: 44px; height: 44px; padding: 0; font-size: 1.4rem; }
+  .avatars button.on { border-color: var(--go); background: rgba(61, 255, 138, .12); }
+  .account-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .account-bar .av { font-size: 2rem; }
+  .account-bar .who { font-family: var(--display); font-size: 1.4rem; font-weight: 700; }
+  .account-bar .tools { margin-left: auto; display: flex; gap: 6px; flex-wrap: wrap; }
+  .offline { color: var(--rest); font-size: .85rem; }
+  .podium { display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: end; gap: 10px; margin: 6px 0 18px; text-align: center; }
+  .podium .pl { background: var(--card-2); border: 1px solid var(--border); border-radius: 12px 12px 4px 4px; padding: 10px 6px; cursor: pointer; display: flex; flex-direction: column; justify-content: flex-end; }
+  .podium .pl.empty-pl { visibility: hidden; }
+  .podium .pl .av { font-size: 2rem; line-height: 1.1; display: block; }
+  .podium .pl b { display: block; font-family: var(--display); font-size: 1.2rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .podium .pl .pts { color: var(--muted); font-size: .85rem; }
+  .podium .pl .rk { font-family: var(--display); font-weight: 800; font-size: 1.6rem; }
+  .podium .p1 { order: 2; min-height: 150px; border-color: rgba(255, 200, 61, .6); background: linear-gradient(180deg, rgba(255, 200, 61, .18), transparent), var(--card-2); }
+  .podium .p1 .rk { color: var(--gold); }
+  .podium .p2 { order: 1; min-height: 120px; }
+  .podium .p3 { order: 3; min-height: 100px; }
+  .podium .p2 .rk { color: #c9d1e0; }
+  .podium .p3 .rk { color: #d08a4a; }
+  .lb tbody tr { cursor: pointer; }
+  .lb tbody tr:hover td { background: rgba(255, 255, 255, .03); }
+  .lb tr.me td { background: rgba(61, 255, 138, .08); }
+  .lb tr.me td:first-child { box-shadow: inset 3px 0 0 var(--go); }
+  .lb td.rank { width: 2.4em; font-family: var(--display); font-weight: 700; font-size: 1.1rem; color: var(--muted); }
+  .lb tr:first-child td.rank { color: var(--gold); }
+  .lb td.av { width: 2em; font-size: 1.3rem; }
+  .feed { list-style: none; margin: 0; padding: 0; }
+  .feed li { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .feed li:last-child { border-bottom: none; }
+  .feed .ic { font-size: 1.3rem; width: 1.6em; text-align: center; }
+  .feed .txt { flex: 1; min-width: 0; }
+  .feed .txt small { display: block; color: var(--muted); font-size: .8rem; }
+  .feed .txt i { color: var(--muted); font-style: normal; }
+  .feed .who { cursor: pointer; font-weight: 700; }
+  .feed .who:hover { text-decoration: underline; }
+  .friend-dialog { background: var(--card); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; width: min(600px, calc(100vw - 32px)); }
+  .friend-dialog::backdrop { background: rgba(0, 0, 0, .6); }
+  .friend-dialog .head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .friend-dialog .head .av { font-size: 2.6rem; }
+  .friend-dialog .head h2 { font-size: 1.8rem; }
+  .friend-dialog .head button { margin-left: auto; }
+  .friend-dialog .badges { margin-top: 14px; }
+
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation: none !important; transition: none !important; }
   }
@@ -405,6 +475,10 @@
 </head>
 <body>
 <main>
+  <div class="storage-warn" id="storageWarn" role="alert" hidden>
+    ⚠ Ton navigateur refuse d'enregistrer les données (stockage plein ou navigation privée).
+    Les nouvelles séances risquent d'être perdues : <b>exporte tes données</b> (Historique → 💾 Exporter).
+  </div>
 
   <!-- ===================== ACCUEIL ===================== -->
   <div id="homeView">
@@ -413,7 +487,10 @@
         <div class="brand">TIMER TRACTION</div>
         <h1 id="greet">On grimpe ?</h1>
       </div>
-      <button class="badges-link" id="badgesBtn">🏅 Badges <b id="badgeCount">0 / 0</b> →</button>
+      <div class="hero-links">
+        <button class="friends-link" id="friendsBtn">👥 Amis <span id="socialStatus" class="social-status"></span></button>
+        <button class="badges-link" id="badgesBtn">🏅 Badges <b id="badgeCount">0 / 0</b> →</button>
+      </div>
     </header>
 
     <section class="streak" id="streak">
@@ -430,7 +507,12 @@
     <section class="card">
       <div class="section-head">
         <h2>Historique</h2>
-        <button id="clearHist" class="btn-link btn-danger">Effacer</button>
+        <div class="hist-tools">
+          <button id="exportBtn" class="btn-link" title="Télécharger un fichier de sauvegarde (séances + badges)">💾 Exporter</button>
+          <button id="importBtn" class="btn-link" title="Ajouter les séances d'un fichier de sauvegarde (fusion, rien n'est remplacé)">📥 Importer</button>
+          <button id="clearHist" class="btn-link btn-danger">Effacer</button>
+          <input type="file" id="importFile" accept=".json,application/json" hidden>
+        </div>
       </div>
       <div id="history"></div>
     </section>
@@ -456,6 +538,16 @@
     </section>
 
     <div id="bgGroups"></div>
+  </div>
+
+  <!-- ===================== PAGE AMIS (rendue par social.js) ===================== -->
+  <div id="friendsView" hidden>
+    <div class="topbar">
+      <button id="friendsBack" class="btn-ghost">← Accueil</button>
+      <h1>Amis</h1>
+      <span style="width:96px"></span>
+    </div>
+    <div id="friendsRoot"></div>
   </div>
 
   <!-- ===================== PAGE EXERCICE ===================== -->
@@ -538,6 +630,7 @@
         <button class="btn-link" id="sumBadgesLink">Voir tous les badges →</button>
       </div>
       <div class="streak-line" id="sumStreak"></div>
+      <div id="recapSocial"></div>
       <div class="actions">
         <button class="btn-go" id="newSession">Nouvelle séance</button>
         <button class="btn-ghost" id="homeBtn">Retour à l'accueil</button>
@@ -549,10 +642,18 @@
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <canvas id="confetti" aria-hidden="true"></canvas>
+<dialog id="friendDialog" class="friend-dialog"></dialog>
+
+<!-- Mode en ligne (facultatif) : sans ces fichiers, l'app marche en local comme avant -->
+<script src="config.js"></script>
+<script src="social.js"></script>
 
 <script>
 (() => {
   // ---------- Stockage ----------
+  // set() renvoie false si l'écriture échoue (quota plein, navigation privée…) et le signale
+  // à l'écran : une séance ne doit jamais être perdue en silence.
+  let storageFailed = false;
   const store = {
     get(key, fallback) {
       try {
@@ -561,9 +662,22 @@
       } catch { return fallback; }
     },
     set(key, value) {
-      try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
+      try {
+        localStorage.setItem(key, JSON.stringify(value));
+        return true;
+      } catch (e) {
+        console.error('[store] écriture impossible', key, e);
+        storageFailed = true;
+        showStorageWarning();
+        return false;
+      }
     }
   };
+  function showStorageWarning() {
+    const w = document.getElementById('storageWarn');
+    if (w) w.hidden = !storageFailed;
+  }
+  try { navigator.storage?.persist?.(); } catch {} // demande au navigateur de ne pas purger les données
 
   // type 'reps'  : on compte des répétitions (unit = nom au singulier, ex. « traction »)
   // type 'timed' : on tient une durée en secondes (start/inc en s), avec `prep` s de préparation
@@ -590,8 +704,106 @@
   let history = store.get('tt.history', []);
   if (!Array.isArray(history)) history = [];
   let unlocked = store.get('tt.badges', {}); // { idBadge: date de déblocage }
+  if (!unlocked || typeof unlocked !== 'object' || Array.isArray(unlocked)) unlocked = {};
 
-  const HISTORY_CAP = 2000;
+  // ---------- Identifiants & migration ----------
+  // Chaque séance a un `id` (format UUID) DÉTERMINISTE, dérivé de sa date et de son exercice :
+  // la même séance a le même id sur tous les navigateurs, donc migrer, importer ou rapatrier
+  // deux fois la même donnée ne crée jamais de doublon.
+  function hashUuid(str) {
+    // 4 × 32 bits (variantes de FNV-1a / murmur), mis en forme d'UUID (version 8, variante RFC)
+    let h1 = 0x811c9dc5, h2 = 0x01000193, h3 = 0x9e3779b9, h4 = 0x85ebca6b;
+    for (let i = 0; i < str.length; i++) {
+      const c = str.charCodeAt(i);
+      h1 = Math.imul(h1 ^ c, 16777619);
+      h2 = Math.imul(h2 ^ c, 2246822507);
+      h3 = Math.imul(h3 ^ c, 3266489909);
+      h4 = Math.imul(h4 ^ c, 668265263);
+      h1 ^= h4 >>> 13; h2 ^= h1 >>> 11; h3 ^= h2 >>> 15; h4 ^= h3 >>> 7;
+    }
+    const hex = [h1, h2, h3, h4].map(h => (h >>> 0).toString(16).padStart(8, '0')).join('');
+    return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-8${hex.slice(13, 16)}-${'89ab'[parseInt(hex[16], 16) & 3]}${hex.slice(17, 20)}-${hex.slice(20, 32)}`;
+  }
+  const sessionId = h => hashUuid(`tt|${h.date}|${h.exId || h.name || ''}`);
+
+  // Garde une entrée d'historique valide (format attendu), sinon null
+  function cleanEntry(h) {
+    if (!h || typeof h !== 'object') return null;
+    const num = v => (typeof v === 'number' && Number.isFinite(v) ? v : null);
+    const date = num(h.date), sets = num(h.sets), reps = num(h.reps);
+    if (date === null || sets === null || reps === null || date <= 0) return null;
+    const e = { date, sets, reps };
+    if (typeof h.exId === 'string') e.exId = h.exId;
+    if (typeof h.name === 'string') e.name = h.name;
+    if (num(h.best) !== null) e.best = h.best;
+    if (Array.isArray(h.list) && h.list.every(v => num(v) !== null)) e.list = h.list.slice();
+    if (num(h.dur) !== null) e.dur = h.dur;
+    e.id = typeof h.id === 'string' && /^[0-9a-f-]{36}$/i.test(h.id) ? h.id.toLowerCase() : sessionId(e);
+    return e;
+  }
+
+  const SCHEMA = 2;
+  (function migrate() {
+    const v = store.get('tt.schema', 1);
+    if (v >= SCHEMA) return;
+    // Copie brute AVANT toute modification, jamais supprimée automatiquement
+    let raw = null;
+    try { raw = { history: localStorage.getItem('tt.history'), badges: localStorage.getItem('tt.badges') }; } catch {}
+    if (raw && raw.history) {
+      const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+      if (!store.set('tt.backup.' + stamp, raw)) return; // pas de migration sans sauvegarde
+    }
+    // v1 → v2 : un id stable par séance, dédoublonnage par id, tri du plus récent au plus ancien
+    const seen = new Set();
+    const next = [];
+    for (const h of history) {
+      const e = cleanEntry(h);
+      if (!e) { // format inattendu : on la garde telle quelle (rien n'est jamais jeté à la migration)
+        console.warn('[store] entrée au format inattendu conservée', h);
+        if (h && typeof h === 'object') next.push(h);
+        continue;
+      }
+      if (seen.has(e.id)) continue;
+      seen.add(e.id);
+      next.push({ ...h, ...e });
+    }
+    next.sort((a, b) => b.date - a.date);
+    history = next;
+    if (store.set('tt.history', history)) store.set('tt.schema', SCHEMA);
+  })();
+
+  // Fusionne des séances (import, rapatriement) : union par id, jamais d'écrasement ni de suppression.
+  // Renvoie le nombre de séances ajoutées.
+  function mergeHistory(entries) {
+    const ids = new Set(history.map(h => h.id));
+    let added = 0;
+    for (const h of entries || []) {
+      const e = cleanEntry(h);
+      if (!e || ids.has(e.id)) continue;
+      ids.add(e.id);
+      history.push(e);
+      added++;
+    }
+    if (added) {
+      history.sort((a, b) => b.date - a.date);
+      store.set('tt.history', history);
+    }
+    return added;
+  }
+
+  // Fusionne des badges { id: date } : garde la date d'obtention la plus ancienne
+  function mergeBadges(map) {
+    let added = 0, changed = false;
+    for (const [id, d] of Object.entries(map || {})) {
+      const t = typeof d === 'number' ? d : Date.parse(d);
+      if (!Number.isFinite(t) || typeof id !== 'string' || id.length > 40) continue;
+      if (!unlocked[id]) { unlocked[id] = t; added++; changed = true; }
+      else if (t < unlocked[id]) { unlocked[id] = t; changed = true; }
+    }
+    if (changed) store.set('tt.badges', unlocked);
+    return added;
+  }
+
   const saveEx = () => { store.set('tt.exercises', exercises); store.set('tt.active', activeId); };
   const exById = id => exercises.find(e => e.id === id);
   const active = () => exById(activeId);
@@ -829,15 +1041,16 @@
     sumSets: $('sumSets'), sumBest: $('sumBest'), sumTime: $('sumTime'), sumStairs: $('sumStairs'),
     sumRecords: $('sumRecords'), sumBadgesWrap: $('sumBadgesWrap'), sumBadges: $('sumBadges'), sumStreak: $('sumStreak'),
     toast: $('toast'), confetti: $('confetti'),
+    friendsView: $('friendsView'), friendsRoot: $('friendsRoot'), recapSocial: $('recapSocial'), socialStatus: $('socialStatus'),
   };
 
   const RING_C = 2 * Math.PI * 90;
   el.ringFg.style.strokeDasharray = RING_C;
 
   // ---------- Navigation ----------
-  // Routes par hash : '#/' = accueil, '#/ex/<id>' = page de l'exercice, '#/badges' = badges.
+  // Routes par hash : '#/' = accueil, '#/ex/<id>' = page de l'exercice, '#/badges' = badges, '#/amis' = amis.
   // Le bouton « précédent » du navigateur fonctionne donc aussi.
-  let view = null; // 'home' | 'ex' | 'badges'
+  let view = null; // 'home' | 'ex' | 'badges' | 'friends'
   const exHash = id => '#/ex/' + encodeURIComponent(id);
 
   function route() {
@@ -852,6 +1065,7 @@
     }
     if (target) showExercise(target);
     else if (location.hash === '#/badges') showBadges();
+    else if (location.hash === '#/amis') showFriends();
     else showHome();
   }
 
@@ -860,6 +1074,7 @@
     el.homeView.hidden = name !== 'home';
     el.exView.hidden = name !== 'ex';
     el.badgesView.hidden = name !== 'badges';
+    el.friendsView.hidden = name !== 'friends';
     window.scrollTo(0, 0);
   }
 
@@ -882,6 +1097,14 @@
     renderBadges();
     setView('badges');
     document.title = 'Badges — ' + baseTitle;
+  }
+
+  function showFriends() {
+    leaveSession();
+    setView('friends');
+    document.title = 'Amis — ' + baseTitle;
+    if (S()) S().renderFriends(el.friendsRoot);
+    else el.friendsRoot.innerHTML = '<section class="card"><p class="empty">Le module en ligne (social.js) est introuvable : l\'app fonctionne normalement en local.</p></section>';
   }
 
   function showExercise(id) {
@@ -1102,9 +1325,10 @@
     const best = Math.max(...list);
     const dur = Math.round((Date.now() - session.startedAt) / 1000);
     const ex = active();
-    history.unshift({ date: Date.now(), exId: ex.id, name: ex.name, sets: list.length, reps: total, best, list, dur });
-    history = history.slice(0, HISTORY_CAP);
-    store.set('tt.history', history);
+    const entry = { date: Date.now(), exId: ex.id, name: ex.name, sets: list.length, reps: total, best, list, dur };
+    entry.id = sessionId(entry);
+    history.unshift(entry); // aucune limite de taille : on ne jette jamais une séance
+    if (!store.set('tt.history', history)) toast('⚠ Séance NON enregistrée : stockage plein. Exporte tes données !');
 
     const fresh = checkBadges();
     const p = session.prev;
@@ -1237,6 +1461,8 @@
     const st = streakDays();
     el.sumStreak.textContent = `🔥 ${plural(st, 'jour')} d'affilée`;
 
+    if (S()) S().renderRecap(el.recapSocial); else el.recapSocial.innerHTML = '';
+
     el.sessionCard.hidden = true;
     el.recap.hidden = false;
     window.scrollTo(0, 0);
@@ -1294,6 +1520,7 @@
     el.badgeCount.textContent = `${BADGES.filter(b => unlocked[b.id]).length} / ${BADGES.length}`;
     el.globalBadges.innerHTML = BADGES.filter(b => !b.ex && unlocked[b.id]).map(badgeChip).join('');
 
+    S()?.renderHomeStatus(el.socialStatus);
     renderHistory();
   }
 
@@ -1383,7 +1610,8 @@
     }
     const groups = groupSessions(all);
     const hm = t => new Date(t).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-    const cards = groups.slice(0, HIST_SESSIONS).map(g => {
+    const ws = S() ? buildWorkouts() : null; // mêmes groupes, dans le même ordre
+    const cards = groups.slice(0, HIST_SESSIONS).map((g, gi) => {
       const items = g.items.slice().reverse(); // ordre chronologique dans la session
       const diff = Math.round((dayStart(Date.now()) - dayStart(g.end)) / 864e5);
       const date = new Date(g.end).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
@@ -1399,7 +1627,8 @@
       }).join('');
       return `<div class="hist-session"><div class="hist-head"><span class="when">${day}</span>` +
         `<span class="meta">${hm(g.start)} – ${hm(g.end)} · <b>${fmt(Math.round((g.end - g.start) / 1000))}</b> · ` +
-        `${plural(exCount, 'exercice')} · ${plural(sets, 'série')}${nRec ? ` · <span style="color:var(--gold)">★ ${plural(nRec, 'record')}</span>` : ''}</span></div>` +
+        `${plural(exCount, 'exercice')} · ${plural(sets, 'série')}${nRec ? ` · <span style="color:var(--gold)">★ ${plural(nRec, 'record')}</span>` : ''}</span>` +
+        `${ws ? `<span class="hist-actions">${S().workoutActions(ws[gi])}</span>` : ''}</div>` +
         `<table><thead><tr><th></th><th>Début</th><th>Exercice</th><th class="num">Séries</th><th class="num">Total</th><th class="num">Max</th><th class="num">Durée</th></tr></thead>` +
         `<tbody>${rows}</tbody></table></div>`;
     }).join('');
@@ -1533,6 +1762,8 @@
   $('homeBtn').addEventListener('click', () => { location.hash = '#/'; });
   $('badgesBtn').addEventListener('click', () => { location.hash = '#/badges'; });
   $('badgesBack').addEventListener('click', () => { location.hash = '#/'; });
+  $('friendsBtn').addEventListener('click', () => { location.hash = '#/amis'; });
+  $('friendsBack').addEventListener('click', () => { location.hash = '#/'; });
   $('sumBadgesLink').addEventListener('click', () => { location.hash = '#/badges'; });
   window.addEventListener('hashchange', route);
 
@@ -1556,15 +1787,128 @@
   intField(el.exInc, 'inc', 0);
   intField(el.exRest, 'rest', 1);
 
+  // ---------- Export / import / effacement ----------
+  function exportData(reason) {
+    const data = {
+      app: 'timer-traction', schema: SCHEMA, exportedAt: new Date().toISOString(),
+      history, badges: unlocked, exercises,
+    };
+    const d = new Date(), p = n => String(n).padStart(2, '0');
+    const name = `timer-traction-${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${reason ? '-' + reason : ''}.json`;
+    const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' }));
+    const a = document.createElement('a');
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    return name;
+  }
+
+  // Analyse un fichier d'export ; renvoie { entries, badges } ou lève une erreur lisible
+  function parseImport(text) {
+    let data;
+    try { data = JSON.parse(text); } catch { throw new Error('ce n\'est pas un fichier JSON valide'); }
+    const list = Array.isArray(data) ? data : data && Array.isArray(data.history) ? data.history : null;
+    if (!list) throw new Error('aucun historique trouvé dans ce fichier');
+    const entries = list.map(cleanEntry).filter(Boolean);
+    if (list.length && !entries.length) throw new Error('aucune séance au bon format');
+    const badges = data && data.badges && typeof data.badges === 'object' && !Array.isArray(data.badges) ? data.badges : {};
+    return { entries, badges, ignored: list.length - entries.length };
+  }
+
+  function importFile(file) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      let parsed;
+      try { parsed = parseImport(String(reader.result)); }
+      catch (e) { alert('Import impossible : ' + e.message + '.\nAucune donnée n\'a été modifiée.'); return; }
+      const ids = new Set(history.map(h => h.id));
+      const fresh = parsed.entries.filter(e => !ids.has(e.id));
+      const newBadges = Object.keys(parsed.badges).filter(id => !unlocked[id]).length;
+      const msg = `Fichier « ${file.name} » : ${plural(parsed.entries.length, 'séance')}` +
+        (parsed.ignored ? ` (${parsed.ignored} illisible${parsed.ignored > 1 ? 's' : ''} ignorée${parsed.ignored > 1 ? 's' : ''})` : '') +
+        `, dont ${plural(fresh.length, 'nouvelle')} et ${plural(newBadges, 'nouveau badge')}.\n\n` +
+        'Les séances sont AJOUTÉES à ton historique (rien n\'est remplacé ni supprimé). Continuer ?';
+      if (!fresh.length && !newBadges) { alert(msg.split('\n')[0] + '\n\nRien de nouveau : tout est déjà dans ton historique.'); return; }
+      if (!confirm(msg)) return;
+      const added = mergeHistory(parsed.entries);
+      mergeBadges(parsed.badges);
+      checkBadges();
+      refresh();
+      toast(`📥 ${plural(added, 'séance')} importée${added > 1 ? 's' : ''}`);
+    };
+    reader.onerror = () => alert('Lecture du fichier impossible. Aucune donnée n\'a été modifiée.');
+    reader.readAsText(file);
+  }
+
+  $('exportBtn').addEventListener('click', () => toast('💾 Export : ' + exportData()));
+  $('importBtn').addEventListener('click', () => $('importFile').click());
+  $('importFile').addEventListener('change', e => {
+    const f = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (f) importFile(f);
+  });
+
+  // Effacer : double confirmation + export automatique juste avant. Ne touche qu'à ce navigateur,
+  // jamais aux entraînements envoyés en ligne (ils reviennent à la prochaine connexion).
   $('clearHist').addEventListener('click', () => {
-    if (!history.length || !confirm('Effacer tout l\'historique ? (les badges débloqués sont conservés)')) return;
+    if (!history.length) return;
+    if (!confirm(`Effacer les ${history.length} séances de CE navigateur ?\n\nUn fichier de sauvegarde sera téléchargé juste avant. Les badges débloqués et les entraînements envoyés en ligne sont conservés.`)) return;
+    const typed = prompt('Pour confirmer, tape SUPPRIMER :');
+    if ((typed || '').trim().toUpperCase() !== 'SUPPRIMER') { toast('Effacement annulé'); return; }
+    const file = exportData('avant-effacement');
     history = [];
     store.set('tt.history', history);
     renderHome();
+    toast('🗑 Historique effacé · sauvegarde : ' + file);
   });
+
+  // Rafraîchit la page affichée (après un import ou un rapatriement)
+  function refresh() {
+    if (view === 'home') renderHome();
+    else if (view === 'badges') renderBadges();
+    else if (view === 'friends') S()?.renderFriends(el.friendsRoot);
+    else if (view === 'ex' && session && session.phase === 'done') S()?.renderRecap(el.recapSocial);
+  }
+
+  // ---------- Entraînements (groupes de séances) ----------
+  // Un entraînement a l'id de sa plus ancienne séance (stable : seul le dernier peut grandir).
+  const POINTS_PER_WORKOUT = 10, POINTS_MAX = 500;
+  function buildWorkouts() {
+    const all = history.map(norm);
+    return groupSessions(all).map(g => {
+      const items = g.items.slice().reverse();         // ordre chronologique
+      const entries = items.map(i => history[i]);
+      const sets = items.reduce((n, i) => n + (all[i].sets || 0), 0);
+      const summary = items.map(i => {
+        const h = all[i], ex = exById(h.exId) || exercises[0];
+        return `${ex.name} ${fmtVal(ex, h.reps)}`;
+      }).join(' · ').slice(0, 300);
+      return {
+        id: entries[0].id || sessionId(entries[0]),
+        start: g.start, end: g.end,
+        sets, points: Math.min(POINTS_MAX, POINTS_PER_WORKOUT + sets),
+        summary, entries,
+        ids: entries.map(e => e.id || sessionId(e)),
+        exCount: new Set(items.map(i => all[i].exId)).size,
+      };
+    });
+  }
+
+  // ---------- Module social (social.js, facultatif) ----------
+  const S = () => window.TTSocial || null;
+  const TT = {
+    get history() { return history; },
+    get unlocked() { return unlocked; },
+    BADGES, exercises, exById, fmt, fmtNum, fmtVal, plural, escapeHtml, dayStart,
+    buildWorkouts, mergeHistory, mergeBadges, checkBadges, refresh, toast,
+    view: () => view,
+    store,
+  };
 
   // ---------- Init ----------
   checkBadges(); // synchronise les badges avec un historique existant
+  showStorageWarning();
+  try { S()?.init(TT); } catch (e) { console.error('[social] init impossible', e); }
   route();
 })();
 </script>
