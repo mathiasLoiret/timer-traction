@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Timer traction</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230a0d13'/%3E%3Crect x='26' y='5' width='12' height='6' rx='2' fill='%23ffc83d'/%3E%3Ccircle cx='32' cy='36' r='20' fill='none' stroke='%23222a3a' stroke-width='7'/%3E%3Cpath d='M32 16a20 20 0 1 1-20 20' fill='none' stroke='%233dff8a' stroke-width='7' stroke-linecap='round'/%3E%3Cpath d='M32 36V24' stroke='%23eef1f7' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
@@ -223,6 +224,18 @@
   th { color: var(--muted); font-weight: 500; font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; }
   td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
   td.star { color: var(--gold); width: 1.4em; }
+  .hist-sessions { display: flex; flex-direction: column; gap: 12px; }
+  .hist-session { background: var(--card-2); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px 4px; }
+  .hist-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin-bottom: 2px; }
+  .hist-head .when { font-family: var(--display); font-weight: 700; font-size: 1.15rem; }
+  .hist-head .meta { color: var(--muted); font-size: .85rem; }
+  .hist-head .meta b { color: var(--text); font-weight: 600; }
+  .hist-session table { font-size: .9rem; table-layout: fixed; }
+  .hist-session th:nth-child(1) { width: 1.6em; }
+  .hist-session th:nth-child(2) { width: 4.6em; }
+  .hist-session th:nth-child(3) { width: 34%; }
+  .hist-session td:nth-child(2) { color: var(--muted); }
+  .hist-more { color: var(--muted); font-size: .85rem; margin: 10px 0 0; text-align: center; }
   .empty { color: var(--muted); font-size: .92rem; margin: 0; }
 
   /* ===== Page exercice ===== */
@@ -1342,6 +1355,21 @@
     el.exRest.value = a.rest;
   }
 
+  // Regroupe l'historique en sessions d'entraînement : deux séances d'exercice font partie
+  // de la même session si la seconde commence moins de SESSION_GAP après la fin de la précédente.
+  const SESSION_GAP = 60 * 60 * 1000;
+  const HIST_SESSIONS = 8;
+  function groupSessions(all) { // all : du plus récent au plus ancien
+    const groups = [];
+    let cur = null;
+    all.forEach((h, i) => {
+      const end = h.date, start = h.date - (h.dur || 0) * 1000;
+      if (cur && cur.start - end < SESSION_GAP) { cur.items.push(i); cur.start = Math.min(cur.start, start); }
+      else { cur = { start, end, items: [i] }; groups.push(cur); }
+    });
+    return groups;
+  }
+
   function renderHistory() {
     if (!history.length) { el.history.innerHTML = '<p class="empty">Aucune séance pour l\'instant. La première est la plus importante !</p>'; return; }
     // Séances record (meilleur total au moment où elles ont été faites, hors toute première)
@@ -1353,15 +1381,31 @@
       if (h.exId in bestByEx && h.reps > bestByEx[h.exId]) records.add(i);
       bestByEx[h.exId] = Math.max(bestByEx[h.exId] ?? 0, h.reps);
     }
-    const rows = all.slice(0, 10).map((h, i) => {
-      const d = new Date(h.date).toLocaleString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
-      const ex = exById(h.exId) || exercises[0];
-      return `<tr><td class="star">${records.has(i) ? '★' : ''}</td><td>${d}</td><td>${escapeHtml(h.name)}</td>` +
-        `<td class="num">${h.sets}</td><td class="num"><b>${fmtNum(ex, h.reps)}</b></td><td class="num">${fmtNum(ex, h.best)}</td><td class="num">${fmt(h.dur)}</td></tr>`;
+    const groups = groupSessions(all);
+    const hm = t => new Date(t).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    const cards = groups.slice(0, HIST_SESSIONS).map(g => {
+      const items = g.items.slice().reverse(); // ordre chronologique dans la session
+      const diff = Math.round((dayStart(Date.now()) - dayStart(g.end)) / 864e5);
+      const date = new Date(g.end).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+      const day = diff === 0 ? "Aujourd'hui" : diff === 1 ? 'Hier' : date.charAt(0).toUpperCase() + date.slice(1);
+      const exCount = new Set(items.map(i => all[i].exId)).size;
+      const sets = items.reduce((n, i) => n + all[i].sets, 0);
+      const nRec = items.filter(i => records.has(i)).length;
+      const rows = items.map(i => {
+        const h = all[i];
+        const ex = exById(h.exId) || exercises[0];
+        return `<tr><td class="star">${records.has(i) ? '★' : ''}</td><td>${hm(h.date - (h.dur || 0) * 1000)}</td><td>${escapeHtml(ex.name)}</td>` +
+          `<td class="num">${h.sets}</td><td class="num"><b>${fmtNum(ex, h.reps)}</b></td><td class="num">${fmtNum(ex, h.best)}</td><td class="num">${fmt(h.dur)}</td></tr>`;
+      }).join('');
+      return `<div class="hist-session"><div class="hist-head"><span class="when">${day}</span>` +
+        `<span class="meta">${hm(g.start)} – ${hm(g.end)} · <b>${fmt(Math.round((g.end - g.start) / 1000))}</b> · ` +
+        `${plural(exCount, 'exercice')} · ${plural(sets, 'série')}${nRec ? ` · <span style="color:var(--gold)">★ ${plural(nRec, 'record')}</span>` : ''}</span></div>` +
+        `<table><thead><tr><th></th><th>Début</th><th>Exercice</th><th class="num">Séries</th><th class="num">Total</th><th class="num">Max</th><th class="num">Durée</th></tr></thead>` +
+        `<tbody>${rows}</tbody></table></div>`;
     }).join('');
-    el.history.innerHTML =
-      `<table><thead><tr><th></th><th>Date</th><th>Exercice</th><th class="num">Séries</th><th class="num">Total</th><th class="num">Max</th><th class="num">Durée</th></tr></thead>` +
-      `<tbody>${rows}</tbody></table>`;
+    const more = groups.length > HIST_SESSIONS
+      ? `<p class="hist-more">+ ${plural(groups.length - HIST_SESSIONS, 'session')} plus ancienne${groups.length - HIST_SESSIONS > 1 ? 's' : ''}</p>` : '';
+    el.history.innerHTML = `<div class="hist-sessions">${cards}</div>${more}`;
   }
 
   // ---------- Célébrations : toast + confettis ----------
