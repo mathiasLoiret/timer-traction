@@ -28,7 +28,7 @@ Contrat cœur ↔ social : le cœur expose `TT` (getters `history`/`unlocked`, `
 - `#homeView` — accueil (route `#/` ou hash vide) : bouton « 🏅 Badges n / total » vers la page badges, bandeau streak (avec les badges **généraux** gagnés en pastilles), une carte par exercice avec ses stats (total, meilleure série, meilleure séance, nb de séances) **et ses badges gagnés en pastilles + le prochain à décrocher** (`exBadgesHtml()`), historique **regroupé en sessions d'entraînement** (`groupSessions()` : une séance d'exercice rejoint la session précédente si elle commence moins de `SESSION_GAP` = 1 h après la fin de la précédente ; début calculé par `date − dur`). Les `HIST_SESSIONS` (8) dernières sessions sont affichées, chacune avec horaires, durée totale, nb d'exercices/séries/records et le détail par exercice.
 - `#badgesView` — page badges (route `#/badges`, `renderBadges()`) : compteur global + barre, « Prochains objectifs » (4 badges verrouillés les plus avancés), puis une section par groupe (Général, puis chaque exercice) avec barre de progression sur chaque badge verrouillé et date sur chaque badge gagné.
 - `#exView` — page d'un exercice (route `#/ex/<id>`) : réglages repliés (`<details>`), séance (`#sessionCard`), récap (`#recap`, avec les badges débloqués et un lien vers la page badges).
-- `#friendsView` — page Amis (route `#/amis`, contenu rendu par `TTSocial.renderFriends(#friendsRoot)`) : connecté·e → barre de compte, classement de la semaine (podium + tableau), fil d'activité, fiche d'un ami (`<dialog id="friendDialog">`) ; sinon → connexion (email → code reçu → pseudo + avatar emoji + code d'invitation). Bouton « 👥 Amis » sur l'accueil avec statut (`#socialStatus` : invité·e / pseudo / hors ligne).
+- `#friendsView` — page Amis (route `#/amis`, contenu rendu par `TTSocial.renderFriends(#friendsRoot)`) : connecté·e → barre de compte, classement de la semaine (podium + tableau), fil d'activité, fiche d'un ami (`<dialog id="friendDialog">`) ; sinon → connexion (email → clic sur le lien reçu → pseudo + avatar emoji + code d'invitation). Bouton « 👥 Amis » sur l'accueil avec statut (`#socialStatus` : invité·e / pseudo / hors ligne).
 
 `route()` est appelé au chargement et sur `hashchange` ; le bouton « précédent » du navigateur marche donc. Quitter une séance en cours demande confirmation, et en cas de refus le hash est remis sur l'exercice. Pour naviguer, toujours modifier `location.hash` plutôt qu'appeler `showHome()`/`showBadges()`/`showExercise()` directement. Quitter la page exercice passe par `leaveSession()` (arrête timer et clignotement).
 
@@ -96,7 +96,7 @@ Implémenté dans `social.js` + `supabase/schema.sql`. Mise en ligne : `SETUP.md
 - **Déconnexion** : ne supprime jamais rien en local.
 
 ### Auth & invitation
-- Code à 6 chiffres par email : `signInWithOtp` puis `verifyOtp({ type: 'email' })` (pas de lien magique, conflit avec le routing par hash). Gérer la limite d'envoi d'emails (« réessaie dans quelques minutes ») et le pseudo déjà pris (code `23505`).
+- Lien de connexion par email (modèles par défaut de Supabase, non modifiés) : `signInWithOtp` avec `emailRedirectTo` = `origin + pathname`, client en `flowType: 'pkce'` + `detectSessionInUrl: true`. PKCE renvoie `?code=` dans la query, donc pas de conflit avec le routing par hash (ne pas passer en flux implicite). Le lien doit être ouvert dans le navigateur qui l'a demandé et ne marche pas en `file://`. Au retour, `social.js` bascule sur `#/amis` avant le premier `route()` et affiche l'erreur éventuelle. Gérer la limite d'envoi d'emails (« réessaie dans quelques minutes ») et le pseudo déjà pris (code `23505`).
 - **Code d'invitation** demandé à la création du profil, vérifié côté base par une fonction `security definer` qui le compare à une table `app_secret` illisible par les clients. Les policies de lecture exigent d'**avoir un profil** : un compte sans code ne voit rien.
 - Clé publishable (`sb_publishable_…`, équivalent de l'ancienne clé `anon`) dans `config.js` : publique, protégée par la RLS ; clé `secret`/`service_role` **jamais** côté client.
 - Création du profil uniquement via la RPC `create_profile(p_pseudo, p_avatar, p_code)` (pas de policy INSERT sur `profiles`). Erreurs : `invalid_invite`, `23505` (pseudo pris), `23514` (longueur).
@@ -118,7 +118,7 @@ Implémenté dans `social.js` + `supabase/schema.sql`. Mise en ligne : `SETUP.md
 - Les pseudos viennent d'autres personnes : **toujours** `escapeHtml` / `textContent`.
 - Hors ligne : la page Amis affiche la dernière version en cache (`tt.socialCache`) avec « hors ligne · mis à jour il y a X min ». Pas de temps réel : chargement à l'ouverture + bouton « Rafraîchir ».
 - Réglages d'exercices (`start`/`inc`/`rest`/`prep`) : propres à chaque navigateur, non synchronisés.
-- `SETUP.md` (pour un non-expert) : exécution de `schema.sql`, code d'invitation, templates d'email **« Confirm signup » et « Magic Link »** avec `{{ .Token }}`, SMTP gratuit (Resend/Brevo), URL du site, déploiement, migration des données `file://` → site, mise en pause du projet gratuit après ~7 jours d'inactivité.
+- `SETUP.md` (pour un non-expert) : exécution de `schema.sql`, code d'invitation, SMTP gratuit (Resend/Brevo), URL du site et *Redirect URLs*, déploiement, migration des données `file://` → site, mise en pause du projet gratuit après ~7 jours d'inactivité.
 
 ## Données (localStorage)
 | Clé | Contenu |
@@ -133,7 +133,7 @@ Implémenté dans `social.js` + `supabase/schema.sql`. Mise en ligne : `SETUP.md
 | `tt.published` | `{ idEntraînement: { sig, retired } }` — `sig` = ids des séances envoyées, triés et joints par `,` |
 | `tt.socialCache` | `{ at, me, leaderboard, feed }` — dernière version du classement/fil (affichée hors ligne) |
 
-`sessionStorage` `tt.otpEmail` : email en attente de code (étape 2 de la connexion).
+`sessionStorage` `tt.otpEmail` : email en attente du clic sur le lien (étape 2 de la connexion).
 
 La session Supabase stocke ses propres clés : ne jamais les effacer (pas de `localStorage.clear()`, suppression ciblée des clés `tt.*` uniquement).
 

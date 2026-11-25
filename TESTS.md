@@ -39,6 +39,12 @@ Méthode : Chrome headless sur une copie de l'app avec des données injectées (
 - ⏳ **Un utilisateur ne peut ni modifier ni supprimer les entraînements ou badges d'un autre.** Test dans la console du navigateur connecté : `sb.from('workouts').update({points:500}).eq('user_id','<autre id>')` → 0 ligne modifiée. `delete` → refusé.
 - ⏳ **Code d'invitation faux** → « Code d'invitation incorrect ». **Pseudo déjà pris** → message clair.
 
+## Connexion par lien
+
+- 🧪 **Demande du lien** : `emailRedirectTo` = adresse de la page, l'écran « Consulte tes emails » s'affiche.
+- 🧪 **Retour avec une erreur, ou avec un `?code=` inutilisable** : page Amis avec un message clair, `?code=` retiré de l'adresse.
+- ⏳ **Clic sur le vrai lien** (site en ligne, même navigateur) : connecté·e, puis création du profil.
+
 ## Page Amis
 
 - ✅ **Sans compte** : le formulaire de connexion s'affiche (supabase-js chargé depuis le CDN).

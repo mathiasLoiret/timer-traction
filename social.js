@@ -1,6 +1,6 @@
 // =====================================================================
 // Timer traction — mode en ligne (facultatif)
-// Comptes (code à 6 chiffres par email), envoi manuel des entraînements, rapatriement à la
+// Comptes (lien de connexion par email), envoi manuel des entraînements, rapatriement à la
 // connexion, page Amis (classement de la semaine, fil d'activité, fiche d'un ami).
 //
 // Principes :
@@ -39,6 +39,19 @@
   const isMember = () => !!(st.user && st.profile);
   const sigOf = ids => ids.slice().sort().join(',');
 
+  // ---------- Retour du lien de connexion ----------
+  // Supabase renvoie sur l'adresse du site avec ?code=… (succès) ou error=… (lien expiré ou déjà
+  // utilisé). On affiche alors la page Amis. Le ?code= est conservé : supabase-js le lit au chargement.
+  const back = (() => {
+    const q = new URLSearchParams(location.search);
+    const h = new URLSearchParams(location.hash.slice(1));
+    const error = q.has('error') || h.has('error');
+    const code = q.has('code');
+    if (error || code) history.replaceState(null, '', location.pathname + (error ? '' : location.search) + '#/amis');
+    return { code, error };
+  })();
+  let linkError = back.error ? 'Ce lien a expiré ou a déjà été utilisé. Demandes-en un nouveau.' : null;
+
   // ---------- Initialisation ----------
   function init(api) {
     TT = api;
@@ -75,7 +88,7 @@
   function createClient() {
     try {
       sb = window.supabase.createClient(CFG.supabaseUrl, CFG.supabaseKey, {
-        auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false },
+        auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce' },
       });
     } catch (e) { return unavailable(e.message); }
     st.lib = 'ready';
@@ -88,6 +101,12 @@
     const user = session ? session.user : null;
     const changed = (user && user.id) !== (st.user && st.user.id);
     st.user = user;
+    if (event === 'INITIAL_SESSION' && back.code) {
+      // Échange du code impossible : lien ouvert dans un autre navigateur, ou périmé
+      if (!user) linkError = 'Connexion impossible avec ce lien. Ouvre-le dans le navigateur où tu l\'as demandé, ou demandes-en un nouveau.';
+      if (new URLSearchParams(location.search).has('code')) history.replaceState(null, '', location.pathname + location.hash);
+    }
+    if (user) { linkError = null; setPendingEmail(null); }
     if (!user) { st.profile = null; st.profileChecked = false; rerender(); return; }
     if (changed) {
       st.profile = null;
@@ -320,32 +339,28 @@
   }
 
   // ---------- Auth ----------
-  const OTP_KEY = 'tt.otpEmail';
-  const otpEmail = () => { try { return sessionStorage.getItem(OTP_KEY); } catch { return null; } };
-  const setOtpEmail = v => { try { v ? sessionStorage.setItem(OTP_KEY, v) : sessionStorage.removeItem(OTP_KEY); } catch {} };
+  const PENDING_KEY = 'tt.otpEmail'; // email en attente du clic sur le lien
+  const pendingEmail = () => { try { return sessionStorage.getItem(PENDING_KEY); } catch { return null; } };
+  const setPendingEmail = v => { try { v ? sessionStorage.setItem(PENDING_KEY, v) : sessionStorage.removeItem(PENDING_KEY); } catch {} };
 
   function authMessage(error) {
     const m = String(error.message || '');
-    if (error.status === 429 || /rate limit|too many|security purposes/i.test(m)) return 'Trop de demandes de code. Réessaie dans quelques minutes.';
+    if (error.status === 429 || /rate limit|too many|security purposes/i.test(m)) return 'Trop de demandes. Réessaie dans quelques minutes.';
+    if (/not authorized/i.test(m)) return 'Le serveur d\'emails n\'est pas autorisé à écrire à cette adresse (voir SETUP.md, étape 4).';
     if (/invalid.*email|email.*invalid|unable to validate email/i.test(m)) return 'Adresse email invalide.';
     if (/signups? not allowed/i.test(m)) return 'Les inscriptions sont fermées sur ce serveur.';
-    return netMessage(error, 'Envoi du code impossible');
+    return netMessage(error, 'Envoi du lien impossible');
   }
 
-  async function sendCode(email) {
-    const { error } = await sb.auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
+  async function sendLink(email) {
+    if (location.protocol === 'file:') return 'La connexion ne fonctionne que sur le site en ligne, pas sur le fichier ouvert par double-clic.';
+    const { error } = await sb.auth.signInWithOtp({
+      email,
+      options: { shouldCreateUser: true, emailRedirectTo: location.origin + location.pathname },
+    });
     if (error) { fail('auth', 'signInWithOtp', error); return authMessage(error); }
-    setOtpEmail(email);
-    return null;
-  }
-
-  async function verifyCode(email, token) {
-    const { error } = await sb.auth.verifyOtp({ email, token, type: 'email' });
-    if (error) {
-      fail('auth', 'verifyOtp', error);
-      return /expired|invalid|otp/i.test(error.message || '') ? 'Code incorrect ou expiré. Vérifie le dernier email reçu, ou redemande un code.' : authMessage(error);
-    }
-    setOtpEmail(null);
+    linkError = null;
+    setPendingEmail(email);
     return null;
   }
 
@@ -523,46 +538,37 @@
   }
 
   function renderLogin(root, intro) {
-    const email = otpEmail();
+    const email = pendingEmail();
+    const msg = linkError ? `<p class="form-msg err" id="frMsg">${esc(linkError)}</p>` : '<p class="form-msg" id="frMsg"></p>';
     if (!email) {
       root.innerHTML = `<section class="card"><h2>Se connecter</h2>${intro}` +
         '<form id="frEmailForm" class="form-row"><label>Ton email<input class="wide" type="email" id="frEmail" required autocomplete="email" placeholder="toi@exemple.fr"></label>' +
-        '<button class="btn-send" type="submit" id="frEmailBtn">Recevoir un code</button></form><p class="form-msg" id="frMsg"></p></section>';
+        `<button class="btn-send" type="submit" id="frEmailBtn">Recevoir un lien</button></form>${msg}</section>`;
       $('frEmailForm').addEventListener('submit', async e => {
         e.preventDefault();
         const v = $('frEmail').value.trim();
         if (!v) return;
-        busyForm('frEmailBtn', 'frMsg', 'Envoi du code…');
-        const err = await sendCode(v);
+        busyForm('frEmailBtn', 'frMsg', 'Envoi du lien…');
+        const err = await sendLink(v);
         if (err) return formError('frEmailBtn', 'frMsg', err);
         renderFriends(root);
       });
       return;
     }
-    root.innerHTML = `<section class="card"><h2>Saisis ton code</h2>` +
-      `<p class="empty" style="margin-top:6px">Un code a été envoyé à <b>${esc(email)}</b>. Il arrive en général en moins d'une minute (pense aux spams).</p>` +
-      '<form id="frCodeForm" class="form-row"><label>Code reçu par email<input type="text" id="frCode" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6,10}" maxlength="10" required placeholder="123456"></label>' +
-      '<button class="btn-send" type="submit" id="frCodeBtn">Valider</button>' +
-      '<button type="button" class="btn-link" id="frResend">Renvoyer un code</button>' +
-      '<button type="button" class="btn-link" id="frChange">Changer d\'email</button></form><p class="form-msg" id="frMsg"></p></section>';
-    $('frCode').focus();
-    $('frCodeForm').addEventListener('submit', async e => {
-      e.preventDefault();
-      const code = $('frCode').value.replace(/\s/g, '');
-      busyForm('frCodeBtn', 'frMsg', 'Vérification…');
-      const err = await verifyCode(email, code);
-      if (err) return formError('frCodeBtn', 'frMsg', err);
-      // onAuthStateChange prend le relais (profil, rapatriement)
-    });
+    root.innerHTML = '<section class="card"><h2>Consulte tes emails</h2>' +
+      `<p class="empty" style="margin-top:6px">Un lien de connexion a été envoyé à <b>${esc(email)}</b> (pense aux spams). ` +
+      'Clique dessus <b>depuis ce navigateur</b> : il ne sert qu\'une fois.</p>' +
+      '<div class="form-row"><button type="button" class="btn-link" id="frResend">Renvoyer un lien</button>' +
+      `<button type="button" class="btn-link" id="frChange">Changer d'email</button></div>${msg}</section>`;
     $('frResend').addEventListener('click', async () => {
-      busyForm('frResend', 'frMsg', 'Envoi d\'un nouveau code…');
-      const err = await sendCode(email);
+      busyForm('frResend', 'frMsg', 'Envoi d\'un nouveau lien…');
+      const err = await sendLink(email);
       if (err) return formError('frResend', 'frMsg', err);
       $('frResend').disabled = false;
       $('frMsg').className = 'form-msg ok';
-      $('frMsg').textContent = 'Nouveau code envoyé.';
+      $('frMsg').textContent = 'Nouveau lien envoyé.';
     });
-    $('frChange').addEventListener('click', () => { setOtpEmail(null); renderFriends(root); });
+    $('frChange').addEventListener('click', () => { setPendingEmail(null); linkError = null; renderFriends(root); });
   }
 
   function renderProfileForm(root) {

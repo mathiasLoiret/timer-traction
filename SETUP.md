@@ -24,33 +24,22 @@ update public.app_secret set value = 'TON-CODE-SECRET' where key = 'invite_code'
 
 Choisis un code difficile à deviner, par exemple `traction-2026-zebre`. Tu le donneras à tes amis avec le lien. Pour couper l'accès à de nouvelles personnes, il suffit de le changer : les profils déjà créés restent actifs.
 
-## 3. Connexion par code à 6 chiffres (email)
+## 3. Connexion par lien (email)
 
-L'app n'utilise pas de lien magique. On reçoit un **code** par email et on le tape dans l'app, ce qui évite les problèmes de redirection.
+On saisit son email dans l'app, puis on clique sur le lien reçu. Les modèles d'email **par défaut** de Supabase conviennent : il n'y a rien à modifier.
 
 1. **Authentication → Sign In / Providers → Email** : vérifie que *Email* est activé.
-   Si un champ *Email OTP Length* existe, mets **6** (l'app accepte de 6 à 10 chiffres).
-2. **Authentication → Emails → Templates**. Il faut modifier **deux** modèles, car un nouveau compte reçoit « Confirm signup » et un compte existant reçoit « Magic Link » :
-   - **Confirm signup** :
-     - Sujet : `Ton code Timer traction`
-     - Corps :
-       ```html
-       <h2>Ton code de connexion</h2>
-       <p>Saisis ce code dans Timer traction :</p>
-       <p style="font-size:28px;font-weight:bold;letter-spacing:4px">{{ .Token }}</p>
-       <p>Il expire dans une heure. Si tu n'as rien demandé, ignore cet email.</p>
-       ```
-   - **Magic Link** : même sujet, même corps.
-   - La variable **`{{ .Token }}`** est indispensable : c'est elle qui affiche le code.
-3. Clique sur **Save** pour chaque modèle.
+2. Règle l'adresse du site (étape 5) : sans elle, le lien renvoie au mauvais endroit.
 
-## 4. (Recommandé) Brancher un serveur d'emails gratuit
+Le lien ne sert qu'une fois, et doit être ouvert **dans le navigateur où on l'a demandé**. La connexion ne fonctionne que sur le site en ligne (pas en `file://`).
 
-Le serveur d'emails par défaut de Supabase n'envoie que **quelques emails par heure**, et seulement pour tester. Au-delà, l'app affiche « Trop de demandes de code. Réessaie dans quelques minutes. »
+## 4. Brancher un serveur d'emails gratuit (nécessaire pour inviter des amis)
+
+Le serveur d'emails par défaut de Supabase n'écrit **qu'aux membres de ton organisation Supabase**, et seulement quelques emails par heure. Tes amis ne recevraient rien.
 
 Pour un usage avec des amis, branche un SMTP gratuit. Exemple avec **Resend** (3 000 emails/mois gratuits), ou **Brevo** :
 
-1. Crée un compte sur <https://resend.com>, ajoute et vérifie ton domaine (ou utilise leur domaine de test), puis crée une **API key**.
+1. Crée un compte sur <https://resend.com>, ajoute et vérifie ton domaine, puis crée une **API key**. Sans nom de domaine, prends plutôt Brevo avec une adresse d'expéditeur vérifiée (le domaine de test de Resend n'écrit qu'à ta propre adresse). Désactive le suivi des clics, qui peut casser le lien.
 2. Dans Supabase : **Authentication → Emails → SMTP Settings** → *Enable custom SMTP* :
    - Host : `smtp.resend.com`, Port : `465`
    - Username : `resend`, Password : ta clé API Resend
@@ -59,9 +48,10 @@ Pour un usage avec des amis, branche un SMTP gratuit. Exemple avec **Resend** (3
 
 ## 5. Adresse du site
 
-**Authentication → URL Configuration** → *Site URL* : mets l'adresse finale du site (étape 6), par exemple `https://ton-pseudo.github.io/timer-traction/`.
+**Authentication → URL Configuration** :
 
-Avec la connexion par code, ce réglage est peu utilisé, mais mieux vaut qu'il soit juste.
+- *Site URL* : l'adresse finale du site (étape 6), par exemple `https://ton-pseudo.github.io/timer-traction/`.
+- *Redirect URLs* : ajoute la même adresse.
 
 ## 6. Mettre le site en ligne (GitHub Pages)
 
@@ -85,7 +75,7 @@ Envoie-leur :
 1. le lien du site ;
 2. le code d'invitation (étape 2).
 
-Chacun clique sur **👥 Amis**, saisit son email, puis le code reçu par email, puis choisit un pseudo, un avatar et saisit le code d'invitation.
+Chacun clique sur **👥 Amis**, saisit son email, clique sur le lien reçu, puis choisit un pseudo, un avatar et saisit le code d'invitation.
 
 Pour apparaître au classement, il faut cliquer sur **📤 Envoyer** sur un entraînement de l'historique, ou dans le récap de fin de séance. Chaque entraînement rapporte **10 points + 1 point par série**. Le classement repart à zéro chaque **lundi à 00:00 (heure de Paris)**.
 
