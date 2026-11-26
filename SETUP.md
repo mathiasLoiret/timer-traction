@@ -77,7 +77,11 @@ Envoie-leur :
 
 Chacun clique sur **👥 Amis**, saisit son email, clique sur le lien reçu, puis choisit un pseudo, un avatar et saisit le code d'invitation.
 
-Pour apparaître au classement, il faut cliquer sur **📤 Envoyer** sur un entraînement de l'historique, ou dans le récap de fin de séance. Chaque entraînement rapporte **10 points + 1 point par série**. Le classement repart à zéro chaque **lundi à 00:00 (heure de Paris)**.
+Pour apparaître au classement, il faut cliquer sur **📤 Envoyer** sur un entraînement de l'historique, ou dans le récap de fin de séance. Chaque entraînement rapporte **10 points + 1 point par série**. Le classement de la semaine repart à zéro chaque **lundi à 00:00 (heure de Paris)**. Juste en dessous, **👑 Depuis toujours** cumule tous les entraînements envoyés.
+
+Pour publier d'un coup un historique ancien (après un import par exemple), clique sur **📤 Tout envoyer** en bas de la page Amis : il envoie les entraînements pas encore envoyés ou modifiés depuis, jamais ceux que tu as retirés.
+
+> **Mise à jour** : si ta base a été créée avant l'ajout de « Depuis toujours », colle de nouveau **tout** `supabase/schema.sql` dans le **SQL Editor**, puis **Run** (rien n'est effacé). Sans cela, ce second classement reste masqué.
 
 ## 9. Bon à savoir
 

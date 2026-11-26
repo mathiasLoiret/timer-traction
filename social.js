@@ -1,7 +1,7 @@
 // =====================================================================
 // Timer traction — mode en ligne (facultatif)
 // Comptes (lien de connexion par email), envoi manuel des entraînements, rapatriement à la
-// connexion, page Amis (classement de la semaine, fil d'activité, fiche d'un ami).
+// connexion, page Amis (classements de la semaine et depuis toujours, fil d'activité, fiche d'un ami).
 //
 // Principes :
 //  - Le local (tt.history) reste la source de vérité : rien ici ne supprime ni n'écrase une
@@ -31,6 +31,7 @@
     loadingSocial: false,
     lastSocialTry: 0,
     pulling: false,
+    bulk: null,             // « Tout envoyer » en cours : { done, total } (total = 0 : vérification)
     myEmpire: undefined,    // ligne `empires` du compte ; null = jamais publié, undefined = inconnu
     empireBusy: false,
   };
@@ -149,8 +150,9 @@
   }
 
   // ---------- Rapatriement : séances et badges du compte → local (fusion, jamais d'écrasement) ----------
+  // Renvoie true si tout a été lu (donc si les statuts d'envoi sont à jour)
   async function pullAll() {
-    if (st.pulling || !isMember()) return;
+    if (st.pulling || !isMember()) return false;
     st.pulling = true;
     try {
       const rows = [];
@@ -186,8 +188,10 @@
         TT.toast(`☁ Récupéré de ton compte : ${TT.plural(added, 'séance')}` + (newBadges ? ` et ${TT.plural(newBadges, 'badge')}` : ''));
       }
       TT.refresh();
+      return true;
     } catch (e) {
       fail('sync', 'rapatriement impossible', e);
+      return false;
     } finally {
       st.pulling = false;
     }
@@ -205,40 +209,45 @@
     return `${fallback} (${m || 'erreur inconnue'})`;
   }
 
+  // Écrit un entraînement en base et mémorise son envoi (lève une erreur en cas d'échec)
+  async function pushWorkout(w) {
+    const row = {
+      id: w.id,
+      started_at: new Date(w.start).toISOString(),
+      duration_sec: clamp((w.end - w.start) / 1000, 0, 6 * 3600),
+      sets: clamp(w.sets, 0, 2000),
+      points: clamp(w.points, 0, 500),
+      summary: w.summary,
+      payload: { v: 2, sessions: w.entries },
+      deleted_at: null,
+    };
+    const { error } = await sb.from('workouts').upsert(row, { onConflict: 'id' });
+    if (error) throw error;
+
+    // Un entraînement plus ancien entièrement englobé par celui-ci (fusion après import
+    // ou rapatriement) est retiré, pour ne pas compter deux fois les mêmes séances.
+    const mine = new Set(w.ids);
+    const englobed = Object.entries(st.published)
+      .filter(([pid, p]) => pid !== w.id && !p.retired && p.sig && p.sig.split(',').every(s => mine.has(s)))
+      .map(([pid]) => pid);
+    if (englobed.length) {
+      const { error: e2 } = await sb.from('workouts').update({ deleted_at: new Date().toISOString() }).in('id', englobed);
+      if (e2) fail('sync', 'retrait des entraînements englobés', e2);
+      else englobed.forEach(pid => { st.published[pid].retired = true; });
+    }
+
+    st.published[w.id] = { sig: sigOf(w.ids), retired: false };
+    savePublished();
+  }
+
   async function sendWorkout(id) {
-    if (!isMember() || st.busy.has(id)) return;
+    if (!isMember() || st.bulk || st.busy.has(id)) return;
     const w = findWorkout(id);
     if (!w) return;
     st.busy.add(id);
     rerenderActions();
     try {
-      const row = {
-        id: w.id,
-        started_at: new Date(w.start).toISOString(),
-        duration_sec: clamp((w.end - w.start) / 1000, 0, 6 * 3600),
-        sets: clamp(w.sets, 0, 2000),
-        points: clamp(w.points, 0, 500),
-        summary: w.summary,
-        payload: { v: 2, sessions: w.entries },
-        deleted_at: null,
-      };
-      const { error } = await sb.from('workouts').upsert(row, { onConflict: 'id' });
-      if (error) throw error;
-
-      // Un entraînement plus ancien entièrement englobé par celui-ci (fusion après import
-      // ou rapatriement) est retiré, pour ne pas compter deux fois les mêmes séances.
-      const mine = new Set(w.ids);
-      const englobed = Object.entries(st.published)
-        .filter(([pid, p]) => pid !== w.id && !p.retired && p.sig && p.sig.split(',').every(s => mine.has(s)))
-        .map(([pid]) => pid);
-      if (englobed.length) {
-        const { error: e2 } = await sb.from('workouts').update({ deleted_at: new Date().toISOString() }).in('id', englobed);
-        if (e2) fail('sync', 'retrait des entraînements englobés', e2);
-        else englobed.forEach(pid => { st.published[pid].retired = true; });
-      }
-
-      st.published[w.id] = { sig: sigOf(w.ids), retired: false };
-      savePublished();
+      await pushWorkout(w);
       await sendBadges();
       st.lastSocialTry = 0; // le classement sera rechargé à la prochaine ouverture
       TT.toast(`📤 Entraînement envoyé · ${w.points} pts`);
@@ -249,6 +258,63 @@
       st.busy.delete(id);
       rerenderActions();
     }
+  }
+
+  // ---------- « Tout envoyer » ----------
+  // Entraînements jamais envoyés ou qui ont changé depuis. Un envoi retiré le reste : on écarte
+  // aussi un entraînement jamais envoyé qui reprend une de ses séances (id changé après un import).
+  function pendingWorkouts() {
+    const retired = new Set(Object.values(st.published)
+      .filter(p => p.retired && p.sig).flatMap(p => p.sig.split(',')));
+    return TT.buildWorkouts().filter(w => {
+      const p = st.published[w.id];
+      if (!p) return !w.ids.some(id => retired.has(id));
+      return !p.retired && p.sig !== sigOf(w.ids);
+    });
+  }
+
+  async function sendAll() {
+    if (!isMember() || st.bulk || st.busy.size) return;
+    st.bulk = { done: 0, total: 0 };
+    rerenderActions();
+    let done = 0;
+    try {
+      // Relire le compte d'abord : un retrait fait sur un autre navigateur doit être respecté
+      if (!await pullAll()) {
+        alert('Impossible de lire ton compte, rien n\'a été envoyé. Vérifie ta connexion et réessaie.');
+        return;
+      }
+      const list = pendingWorkouts();
+      if (!list.length) { TT.toast('✓ Tout est déjà envoyé'); return; }
+      if (!confirm(`Envoyer ${TT.plural(list.length, 'entraînement')} ?\n\n` +
+        'Ils compteront dans les classements et seront visibles par tes amis. ' +
+        'Ceux que tu as retirés ne sont pas renvoyés.')) return;
+      st.bulk.total = list.length;
+      for (const w of list) {
+        rerenderActions();
+        await pushWorkout(w);
+        st.bulk.done = ++done;
+      }
+      TT.toast(`📤 ${TT.plural(done, 'entraînement')} envoyé${done > 1 ? 's' : ''}`);
+    } catch (e) {
+      fail('sync', 'envoi groupé interrompu', e);
+      alert(`${netMessage(e, 'Envoi interrompu')}\n\nEntraînements envoyés avant l'erreur : ${done}. Relance « Tout envoyer » pour le reste.`);
+    } finally {
+      if (done) await sendBadges().catch(e => fail('sync', 'envoi des badges', e));
+      st.bulk = null;
+      if (done) st.lastSocialTry = 0; // le nouveau rendu recharge les classements
+      rerenderActions();
+    }
+  }
+
+  function sendAllHtml() {
+    const b = st.bulk;
+    if (b) {
+      const label = b.total ? `Envoi ${Math.min(b.done + 1, b.total)} / ${b.total}…` : 'Vérification…';
+      return `<p style="text-align:center"><span class="hist-actions"><span class="sent">⏳ ${label}</span></span></p>`;
+    }
+    const n = pendingWorkouts().length;
+    return n ? `<p style="text-align:center"><span class="hist-actions"><button class="btn-send" data-tt-act="send-all">📤 Tout envoyer (${n})</button></span></p>` : '';
   }
 
   // Tous les badges débloqués en local (déjà présents en base : ignorés)
@@ -262,7 +328,7 @@
   }
 
   async function retireWorkout(id) {
-    if (!isMember() || st.busy.has(id)) return;
+    if (!isMember() || st.bulk || st.busy.has(id)) return;
     if (!confirm('Retirer cet entraînement du classement et du fil d\'activité ?\n\nTes séances restent dans ton historique, et tu pourras le renvoyer plus tard.')) return;
     st.busy.add(id);
     rerenderActions();
@@ -387,7 +453,7 @@
   function workoutActions(w) {
     if (!w || !isMember()) return '';
     const id = esc(w.id);
-    if (st.busy.has(w.id)) return '<span class="sent">⏳ …</span>';
+    if (st.bulk || st.busy.has(w.id)) return '<span class="sent">⏳ …</span>';
     const p = st.published[w.id];
     const retire = `<button class="btn-link" data-tt-act="retire" data-wid="${id}" title="Retirer du classement et du fil">Retirer</button>`;
     if (!p || p.retired) {
@@ -442,6 +508,7 @@
     const act = t.dataset.ttAct, wid = t.dataset.wid;
     if (act === 'send') sendWorkout(wid);
     else if (act === 'retire') retireWorkout(wid);
+    else if (act === 'send-all') sendAll();
     else if (act === 'empire-send') sendEmpire();
     else if (act === 'empire-hide') hideEmpire();
     else if (act === 'refresh') loadSocial(true);
@@ -503,17 +570,20 @@
     st.lastSocialTry = Date.now();
     rerenderFriendsOnly();
     try {
-      const [lb, feed, emp] = await Promise.all([
+      // Facultatif : un échec (table ou vue absente…) ne doit pas bloquer le classement ni le fil
+      const optional = query => Promise.resolve(query).catch(error => ({ error }));
+      const [lb, feed, total, emp] = await Promise.all([
         sb.from('leaderboard_week').select('*'),
         sb.from('activity_feed').select('*'),
-        // Facultatif : un échec (table absente…) ne doit pas bloquer le classement ni le fil
-        Promise.resolve(sb.from('empires').select('user_id, base_level, fleet_power, planets').eq('hidden', false))
-          .catch(error => ({ error })),
+        optional(sb.from('leaderboard_total').select('*')),
+        optional(sb.from('empires').select('user_id, base_level, fleet_power, planets').eq('hidden', false)),
       ]);
       if (lb.error) throw lb.error;
       if (feed.error) throw feed.error;
+      if (total.error) fail('social', 'chargement du classement total', total.error);
       if (emp.error) fail('social', 'chargement des empires', emp.error);
-      st.social = { at: Date.now(), me: st.user.id, leaderboard: lb.data, feed: feed.data, empires: emp.error ? null : emp.data };
+      st.social = { at: Date.now(), me: st.user.id, leaderboard: lb.data, total: total.error ? null : total.data,
+        feed: feed.data, empires: emp.error ? null : emp.data };
       st.socialErr = null;
       TT.store.set('tt.socialCache', st.social);
     } catch (e) {
@@ -552,15 +622,13 @@
   const badgeLabel = id => { const b = badgeById(id); return b ? `${b.icon} ${b.name}` : `🏅 ${id}`; };
   const who = (r) => `<span class="who" data-tt-user="${esc(r.user_id)}">${esc(r.avatar || '')} ${esc(r.pseudo)}</span>`;
 
-  function leaderboardHtml(rows, me) {
+  // Carte d'un classement : titre, podium du top 3 et tableau (semaine ou depuis toujours)
+  function leaderboardHtml(rows, me, { title, note, empty }) {
     const list = (rows || []).slice().sort((a, b) =>
       b.points - a.points || b.workouts - a.workouts || String(a.pseudo).localeCompare(String(b.pseudo), 'fr'));
     const active = list.filter(r => r.points > 0);
-    const head = `<div class="section-head"><h2>🏆 Classement de la semaine</h2><small>Remise à zéro lundi 00:00 · dans ${untilReset()}</small></div>`;
-    if (!active.length) {
-      return head + '<p class="empty">Aucun entraînement envoyé cette semaine pour l\'instant. À toi d\'ouvrir le bal : 📤 Envoyer depuis ton historique !</p>' +
-        tableHtml(list, me);
-    }
+    const head = `<div class="section-head"><h2>${title}</h2><small>${note}</small></div>`;
+    if (!active.length) return head + `<p class="empty">${empty}</p>` + tableHtml(list, me);
     const pl = (r, i) => r
       ? `<div class="pl p${i + 1}" data-tt-user="${esc(r.user_id)}"><span class="rk">${i + 1}</span><span class="av">${esc(r.avatar || '🙂')}</span>` +
         `<b>${esc(r.pseudo)}</b><span class="pts">${r.points} pts</span></div>`
@@ -605,7 +673,18 @@
   }
 
   function socialBlocks(data, me) {
-    return `<section class="card">${leaderboardHtml(data.leaderboard, me)}</section>` +
+    const week = leaderboardHtml(data.leaderboard, me, {
+      title: '🏆 Classement de la semaine',
+      note: `Remise à zéro lundi 00:00 · dans ${untilReset()}`,
+      empty: 'Aucun entraînement envoyé cette semaine pour l\'instant. À toi d\'ouvrir le bal : 📤 Envoyer depuis ton historique !',
+    });
+    // data.total absent : vue pas encore créée (schema.sql à relancer) ou ancien cache
+    const total = data.total ? `<section class="card">${leaderboardHtml(data.total, me, {
+      title: '👑 Depuis toujours',
+      note: 'tous les entraînements envoyés',
+      empty: 'Aucun entraînement envoyé pour l\'instant.',
+    })}</section>` : '';
+    return `<section class="card">${week}</section>` + total +
       empiresHtml(data, me) +
       `<section class="card">${feedHtml(data.feed)}</section>`;
   }
@@ -648,7 +727,8 @@
       (st.social && st.social.me === st.user.id ? socialBlocks(st.social, st.user.id)
         : st.socialErr ? `<section class="card"><p class="form-msg err">${esc(st.socialErr)}</p></section>`
         : '<section class="card"><p class="empty">Chargement du classement…</p></section>') +
-      '<p class="empty" style="text-align:center">Pour apparaître au classement : 📤 Envoyer sur un entraînement de ton historique (10 pts + 1 pt par série).</p>';
+      '<p class="empty" style="text-align:center">Pour apparaître au classement : 📤 Envoyer sur un entraînement de ton historique (10 pts + 1 pt par série).</p>' +
+      sendAllHtml();
     loadSocial(false);
   }
 

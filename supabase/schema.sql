@@ -203,6 +203,22 @@ left join public.workouts w
  and w.started_at <  b.week_end
 group by p.id, p.pseudo, p.avatar;
 
+-- Classement depuis toujours : tous les entraînements envoyés (hors retirés).
+create or replace view public.leaderboard_total with (security_invoker = true) as
+select
+  p.id                                  as user_id,
+  p.pseudo,
+  p.avatar,
+  count(w.id)::int                      as workouts,
+  coalesce(sum(w.points), 0)::int       as points,
+  coalesce(sum(w.sets), 0)::int         as sets,
+  coalesce(sum(w.duration_sec), 0)::int as duration_sec
+from public.profiles p
+left join public.workouts w
+  on w.user_id = p.id
+ and w.deleted_at is null
+group by p.id, p.pseudo, p.avatar;
+
 -- Fil d'activité : 50 derniers événements (entraînements envoyés + badges obtenus)
 create or replace view public.activity_feed with (security_invoker = true) as
 select * from (
@@ -229,5 +245,5 @@ select * from (
 order by at desc
 limit 50;
 
-revoke all on public.leaderboard_week, public.activity_feed from anon;
-grant select on public.leaderboard_week, public.activity_feed to authenticated;
+revoke all on public.leaderboard_week, public.leaderboard_total, public.activity_feed from anon;
+grant select on public.leaderboard_week, public.leaderboard_total, public.activity_feed to authenticated;

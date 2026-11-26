@@ -55,6 +55,17 @@ Méthode : Chrome headless sur une copie de l'app avec des données injectées (
 - ⏳ **Hors ligne** : la dernière version en cache s'affiche avec « ⚠ hors ligne · mis à jour il y a X ».
 - ⏳ **Une séance envoyée apparaît dans le classement et le fil d'un autre compte** après « ↻ Rafraîchir ».
 
+## Classement « Depuis toujours » et « Tout envoyer »
+
+Exécuté le 26/11/2026, Chrome headless.
+
+- 🧪 **Deux classements** : semaine puis « Depuis toujours », podium et tableau, pseudo piégé affiché comme du texte.
+- 🧪 **Vue `leaderboard_total` absente** : seule la seconde carte disparaît, empires et fil intacts.
+- 🧪 **Tout envoyer** (12 entraînements) : 9 proposés (jamais envoyés ou modifiés) ; exclus : celui à jour, le retiré, et un nouvel id reprenant une séance retirée.
+- 🧪 **Erreur au 4e envoi** : arrêt, message avec 3 envoyés, bouton « Tout envoyer (6) » ; la relance envoie les 6, puis le bouton disparaît.
+- ⏳ **Après avoir relancé `supabase/schema.sql`** : la vue réelle donne les bons totaux (retirés exclus), lisible par les membres seulement.
+- ⏳ **À la main** : « Tout envoyer » sur le vrai historique.
+
 ## Échauffement
 
 Exécuté le 26/11/2026, Chrome headless en temps accéléré.
