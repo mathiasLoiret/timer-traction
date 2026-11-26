@@ -139,34 +139,45 @@
   .mini div span { color: var(--muted); font-size: .8rem; }
   .mini div.gold b { color: var(--gold); }
 
-  .ex-list { display: grid; gap: 14px; margin-bottom: 16px; }
+  .ex-list { margin-bottom: 16px; }
+  .ex-group { font-size: 1.4rem; margin: 22px 0 10px; }
+  .ex-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+  @media (max-width: 760px) { .ex-grid { grid-template-columns: minmax(0, 1fr); } }
   .ex-card {
     position: relative;
     overflow: hidden;
     text-align: left;
-    padding: 26px 28px;
+    padding: 22px 22px 20px;
     border-radius: var(--radius);
     border: 1px solid var(--border);
     background:
       linear-gradient(120deg, rgba(61, 255, 138, .14), transparent 55%),
       var(--card);
-    display: grid;
-    grid-template-columns: 1fr auto;
-    align-items: center;
-    gap: 6px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
   }
   .ex-card:hover { border-color: var(--go); box-shadow: 0 10px 40px rgba(61, 255, 138, .12); }
-  .ex-card .name { font-family: var(--display); font-weight: 800; font-size: 2.6rem; line-height: 1; text-transform: uppercase; letter-spacing: .02em; }
-  .ex-card .meta { color: var(--muted); font-size: .95rem; grid-column: 1; }
-  .ex-card .last { color: var(--text); font-size: .95rem; grid-column: 1; }
+  .ex-card .name { font-family: var(--display); font-weight: 800; font-size: 2.2rem; line-height: 1; text-transform: uppercase; letter-spacing: .02em; }
+  .ex-card .meta { color: var(--muted); font-size: .9rem; }
+  .ex-card .last { color: var(--text); font-size: .95rem; }
   .ex-card .cta {
-    grid-column: 2; grid-row: 1 / span 5;
+    margin-top: auto;
     background: var(--go); color: var(--go-ink);
-    font-family: var(--display); font-weight: 800; font-size: 1.4rem; text-transform: uppercase; letter-spacing: .04em;
-    padding: 12px 22px; border-radius: 12px;
+    font-family: var(--display); font-weight: 800; font-size: 1.3rem; text-transform: uppercase; letter-spacing: .04em;
+    padding: 10px 20px; border-radius: 12px;
     white-space: nowrap;
   }
-  @media (max-width: 560px) { .ex-card { grid-template-columns: 1fr; } .ex-card .cta { grid-column: 1; grid-row: auto; justify-self: start; margin-top: 8px; } }
+  .ex-card .ex-badges { margin-bottom: 12px; }
+
+  /* Étoiles (cumul total) et compteur de badges d'un exercice */
+  .ex-progress { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; font-size: .85rem; color: var(--muted); }
+  .ex-progress b { color: var(--gold); font-weight: 600; white-space: nowrap; }
+  .stars { display: inline-flex; gap: 2px; font-size: 1.5rem; line-height: 1; }
+  .stars span { position: relative; color: #394258; }
+  .stars i { position: absolute; left: 0; top: 0; overflow: hidden; font-style: normal; color: var(--gold); }
+  #exProgress { justify-content: center; margin-bottom: 12px; }
 
   .badges { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
   .badge {
@@ -242,21 +253,18 @@
   .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
   .topbar h1 { font-size: 1.8rem; text-transform: uppercase; letter-spacing: .04em; }
 
-  details.settings { margin-bottom: 16px; }
-  details.settings summary {
-    cursor: pointer;
-    list-style: none;
-    color: var(--muted);
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 10px;
-    border-radius: 10px;
-  }
-  details.settings summary::-webkit-details-marker { display: none; }
-  details.settings summary:hover { color: var(--text); }
-  details.settings[open] summary { color: var(--text); }
-  .settings .row { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 10px; padding: 16px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); }
+  /* Page réglages */
+  .set-intro { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; color: var(--muted); font-size: .92rem; }
+  .set-intro p { margin: 0; }
+  details.set-ex { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 10px; }
+  details.set-ex summary { cursor: pointer; padding: 14px 18px; border-radius: var(--radius); display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; }
+  details.set-ex summary b { font-family: var(--display); font-size: 1.35rem; text-transform: uppercase; letter-spacing: .02em; }
+  details.set-ex summary small { color: var(--muted); font-size: .85rem; }
+  details.set-ex[open] { border-color: var(--faint); }
+  .set-body { padding: 0 18px 16px; }
+  .set-fields { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px; }
+  .set-fields label span.val { color: var(--faint); min-height: 1.3em; }
+  .set-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; margin-top: 14px; }
   label { display: flex; flex-direction: column; font-size: .8rem; color: var(--muted); gap: 4px; }
   input {
     font: inherit;
@@ -408,6 +416,7 @@
     background: linear-gradient(180deg, rgba(61, 255, 138, .08), transparent), var(--card);
     padding: 10px 18px;
   }
+  .settings-link { font-family: var(--display); font-weight: 700; font-size: 1.25rem; letter-spacing: .02em; background: var(--card); padding: 10px 18px; }
   .friends-link:hover { border-color: var(--go); box-shadow: 0 6px 30px rgba(61, 255, 138, .12); }
   .social-status { font-family: system-ui, sans-serif; font-weight: 400; font-size: .8rem; color: var(--muted); letter-spacing: 0; }
   .hist-actions { margin-left: auto; display: inline-flex; gap: 6px; align-items: center; }
@@ -468,6 +477,166 @@
   .friend-dialog .head button { margin-left: auto; }
   .friend-dialog .badges { margin-top: 14px; }
 
+  /* ===== Échauffement : facultatif, volontairement différent des cartes d'exercice ===== */
+  .warm-banner {
+    display: flex; align-items: center; gap: 16px; width: 100%; text-align: left;
+    padding: 14px 20px; margin-bottom: 16px; border-radius: var(--radius);
+    border: 2px dashed rgba(255, 159, 28, .5); background: transparent;
+  }
+  .warm-banner:hover { border-color: var(--rest); background: rgba(255, 159, 28, .07); }
+  .warm-banner .ic { font-size: 2rem; line-height: 1; }
+  .warm-banner .txt { flex: 1; min-width: 0; }
+  .warm-banner b { display: block; font-family: var(--display); font-size: 1.5rem; line-height: 1.15; color: var(--rest); text-transform: uppercase; letter-spacing: .03em; }
+  .warm-banner small { color: var(--muted); font-size: .88rem; display: block; }
+  .warm-banner .state { font-family: var(--display); font-weight: 700; font-size: 1.15rem; color: var(--rest); white-space: nowrap; }
+  .warm-banner.done .state { color: var(--go); }
+
+  .fig { width: 100%; height: auto; display: block; }
+  .fig .limb { fill: none; stroke: var(--text); stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; }
+  .fig .head { fill: var(--text); }
+  .fig .hand { fill: var(--go); }
+  .fig .limb.far { stroke: var(--muted); } /* seconde jambe, vue de profil */
+  .fig .prop { fill: none; stroke: var(--faint); stroke-width: 3; stroke-linecap: round; }
+  .fig .bar { fill: none; stroke: var(--gold); stroke-width: 6; stroke-linecap: round; }
+  .fig .arrow { fill: none; stroke: var(--rest); stroke-width: 3; stroke-linecap: round; }
+  .fig .tip { fill: var(--rest); }
+  .fig .orbit { fill: none; stroke: var(--rest); stroke-width: 1.5; stroke-dasharray: 4 6; opacity: .55; }
+
+  /* Démonstration de la position (page exercice) : compacte pour garder la séance accessible */
+  .demo-card { padding: 10px 12px; margin-bottom: 12px; }
+  .demo-card h2 { font-size: 1.05rem; margin-bottom: 6px; }
+  .demo { display: flex; align-items: stretch; gap: 10px; }
+  .demo-main { flex: 0 0 160px; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 4px; display: grid; place-items: center; }
+  .demo-main:empty { display: none; }
+  .demo-steps { flex: 1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; list-style: none; margin: 0; padding: 0; }
+  .demo-steps li { background: var(--card-2); border: 2px solid var(--border); border-radius: 12px; padding: 6px; text-align: center; display: flex; flex-direction: column; justify-content: space-between; }
+  .demo-steps li.on { border-color: var(--go); background: rgba(61, 255, 138, .08); }
+  .demo-steps .fig { max-width: 108px; margin: 0 auto; }
+  .demo-steps p { margin: 2px 0 0; font-size: .8rem; line-height: 1.25; color: var(--muted); }
+  .demo-steps li.on p { color: var(--text); }
+  .demo-steps b { color: var(--go); margin-right: 4px; }
+  @media (max-width: 640px) {
+    .demo { flex-direction: column; }
+    .demo-main { flex-basis: auto; width: 100%; max-width: 240px; align-self: center; }
+  }
+
+  #sessionCard { padding-top: 14px; }
+  #sessionCard .stage { min-height: 310px; }
+
+  .warm-list { list-style: none; margin: 16px 0 20px; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+  .warm-list li { background: var(--card-2); border: 1px solid var(--border); border-radius: 14px; padding: 10px; text-align: center; }
+  .warm-list b { display: block; font-family: var(--display); font-size: 1.1rem; line-height: 1.15; margin-top: 4px; }
+  .warm-list small { color: var(--muted); font-size: .78rem; display: block; line-height: 1.35; }
+  .warm-dots { display: flex; justify-content: center; gap: 6px; margin: 8px 0 14px; }
+  .warm-dots i { width: 22px; height: 6px; border-radius: 99px; background: var(--track); }
+  .warm-dots i.ok { background: var(--go); }
+  .warm-dots i.skip { background: var(--faint); }
+  .warm-dots i.cur { background: var(--rest); }
+  .warm-stage { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 24px; }
+  .warm-fig { display: flex; flex: 1 1 320px; max-width: 420px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; }
+  .warm-fig .fig { flex: 1; min-width: 0; }
+  .warm-stage .ring { width: 220px; height: 220px; }
+  .warm-stage .ring .time, .warm-stage[data-phase="prep"] .ring .time { font-size: 5rem; }
+  .warm-name { font-size: 2.2rem; margin-top: 16px; text-transform: uppercase; }
+  .warm-zones { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-bottom: 18px; }
+  .warm-zones span { font-size: .8rem; color: var(--rest); border: 1px solid rgba(255, 159, 28, .4); border-radius: 99px; padding: 2px 10px; }
+
+  /* ===== Mode « Base stellaire » (game.js) ===== */
+  .game-toggle { display: inline-flex; align-items: center; gap: 10px; font-family: var(--display); font-weight: 700; font-size: 1.25rem; letter-spacing: .02em; background: var(--card); padding: 10px 18px; }
+  .game-toggle i { position: relative; width: 38px; height: 22px; border-radius: 99px; background: var(--track); transition: background .15s; }
+  .game-toggle i::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: var(--muted); transition: transform .15s, background .15s; }
+  .game-toggle[aria-checked="true"] { border-color: var(--blue); }
+  .game-toggle[aria-checked="true"] i { background: var(--blue); }
+  .game-toggle[aria-checked="true"] i::after { transform: translateX(16px); background: var(--text); }
+  .game-banner {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; width: 100%; text-align: left;
+    padding: 14px 20px; margin-bottom: 16px; border-radius: var(--radius);
+    border-color: rgba(91, 140, 255, .55);
+    background: linear-gradient(100deg, rgba(91, 140, 255, .2), transparent 70%), var(--card);
+  }
+  .game-banner:hover { border-color: var(--blue); box-shadow: 0 6px 30px rgba(91, 140, 255, .18); }
+  .game-banner .ic { font-size: 2rem; line-height: 1; }
+  .game-banner .txt { flex: 1; min-width: 200px; }
+  .game-banner b { display: block; font-family: var(--display); font-size: 1.5rem; line-height: 1.15; text-transform: uppercase; letter-spacing: .03em; }
+  .game-banner small { color: var(--muted); font-size: .88rem; display: block; }
+  .g-mini { display: flex; gap: 14px; font-family: var(--display); font-weight: 700; font-size: 1.25rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  .g-resources { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  .g-res { background: var(--card-2); border: 1px solid var(--border); border-radius: 12px; padding: 10px; text-align: center; }
+  .g-res b { display: block; font-family: var(--display); font-size: 2rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .g-res span, .g-res small { display: block; color: var(--muted); font-size: .85rem; }
+  .g-res small { font-size: .75rem; color: var(--faint); }
+  .g-help { margin-top: 12px; text-align: center; }
+  .g-scene-card { padding: 0; overflow: hidden; background: var(--bg); }
+  .g-scene { display: block; width: 100%; height: auto; }
+  .g-label { fill: var(--faint); font: 700 13px var(--display); letter-spacing: .1em; }
+  .g-stats { margin: 0; padding: 12px 20px; background: var(--card); border-top: 1px solid var(--border); text-align: center; color: var(--muted); }
+  .g-stats b { color: var(--text); }
+  .g-target-row { display: flex; align-items: center; gap: 18px; }
+  .g-target-row > .g-planet { width: 170px; flex: none; }
+  .g-target-info { flex: 1; min-width: 0; }
+  .g-target-info h3 { font-size: 2rem; text-transform: uppercase; }
+  .g-target-info p { margin: 4px 0; color: var(--muted); }
+  .g-target-info p b { color: var(--text); }
+  .g-odds { height: 10px; margin: 8px 0; }
+  .g-buy { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 12px; color: var(--muted); font-size: .9rem; }
+  .g-report { margin: 0 0 14px; padding: 10px 14px; border-radius: 12px; font-weight: 600; }
+  .g-report.won { background: rgba(255, 200, 61, .12); border: 1px solid rgba(255, 200, 61, .5); color: var(--gold); }
+  .g-report.lost { background: rgba(255, 77, 94, .1); border: 1px solid rgba(255, 77, 94, .5); color: var(--danger); }
+  .g-fight { margin: 0 0 8px; text-align: center; font-family: var(--display); font-weight: 700; font-size: 1.5rem; color: var(--rest); }
+  .g-battle { background: var(--bg); border-radius: 12px; }
+  .g-galaxy { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 6px; list-style: none; margin: 18px 0 0; padding: 14px 0 0; border-top: 1px solid var(--border); text-align: center; }
+  .g-galaxy .g-planet { display: block; width: 100%; max-width: 56px; margin: 0 auto; border-radius: 50%; }
+  .g-galaxy small { display: block; font-size: .72rem; color: var(--muted); line-height: 1.2; overflow-wrap: anywhere; }
+  .g-galaxy .won small { color: var(--gold); }
+  .g-galaxy .cur .g-planet { outline: 2px dashed var(--rest); }
+  .g-galaxy .cur .g-planet { opacity: .75; }
+  .g-q { display: grid; place-items: center; width: 100%; max-width: 56px; aspect-ratio: 1; margin: 0 auto; border-radius: 50%; background: var(--track); color: var(--faint); font-family: var(--display); font-size: 1.3rem; }
+  @media (max-width: 640px) {
+    .g-target-row { flex-direction: column; text-align: center; }
+    .g-buy { justify-content: center; }
+    .g-galaxy { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  }
+  .g-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+  @media (max-width: 760px) { .g-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .g-item { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; background: var(--card-2); border: 1px solid var(--border); border-radius: 14px; padding: 12px 10px; }
+  .g-item b { font-family: var(--display); font-size: 1.25rem; line-height: 1.15; }
+  .g-item b em { font-style: normal; color: var(--gold); }
+  .g-item small { color: var(--muted); font-size: .8rem; min-height: 2.4em; }
+  .g-item button, .g-item .g-max, .g-item .g-lock { margin-top: auto; }
+  .g-item.locked .g-ship { filter: grayscale(1); opacity: .3; }
+  .g-ship { width: 100%; max-width: 130px; height: 64px; }
+  .g-pips { display: flex; gap: 4px; }
+  .g-pips i { width: 18px; height: 6px; border-radius: 99px; background: var(--track); }
+  .g-pips i.on { background: var(--blue); }
+  .g-costs { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; }
+  .g-cost { font-size: .82rem; border: 1px solid var(--border); border-radius: 99px; padding: 1px 8px; color: var(--text); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .g-cost.short { color: var(--danger); border-color: rgba(255, 77, 94, .45); }
+  .g-max { color: var(--gold); font-size: .85rem; }
+  .g-lock { color: var(--faint); font-size: .85rem; }
+  .g-gain { display: inline-flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px 16px; margin-top: 16px; padding: 10px 18px; border-radius: 12px; border: 1px solid rgba(91, 140, 255, .5); background: rgba(91, 140, 255, .12); }
+  .g-gain b { font-family: var(--display); font-size: 1.4rem; }
+  .g-gain a { color: var(--blue); }
+  .g-empire-actions { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px; }
+  .g-empire-actions .sent { color: var(--go); font-size: .9rem; }
+
+  /* Animations du jeu */
+  .g-float { animation: g-float 4s ease-in-out infinite; }
+  .g-float.f1 { animation-duration: 5s; animation-delay: -2s; }
+  .g-float.f2 { animation-duration: 6s; animation-delay: -3s; }
+  @keyframes g-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .g-flame { animation: g-flicker .35s steps(2) infinite; }
+  .g-lamp { animation: g-flicker 1.8s ease-in-out infinite; }
+  @keyframes g-flicker { 50% { opacity: .45; } }
+  .g-laser { stroke-dasharray: 18 100; stroke-dashoffset: 18; stroke-linecap: round; animation: g-shot .55s linear 3 both; }
+  @keyframes g-shot { from { stroke-dashoffset: 18; } to { stroke-dashoffset: -100; } }
+  .g-boom { opacity: 0; transform-box: fill-box; transform-origin: center; animation: g-boom .8s ease-out both; }
+  @keyframes g-boom { 0% { opacity: 0; transform: scale(.2); } 30% { opacity: .9; } 100% { opacity: 0; transform: scale(1.8); } }
+  .g-target { animation: g-shake .18s linear .5s 9; }
+  @keyframes g-shake { 25% { transform: translate(3px, -2px); } 75% { transform: translate(-3px, 2px); } }
+  .g-target.won { animation: g-shake .18s linear .5s 7, g-fall .6s ease-in 1.8s forwards; }
+  @keyframes g-fall { to { opacity: .35; } }
+
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation: none !important; transition: none !important; }
   }
@@ -488,6 +657,8 @@
         <h1 id="greet">On grimpe ?</h1>
       </div>
       <div class="hero-links">
+        <button class="game-toggle" id="gameToggle" role="switch" aria-checked="false" title="Base stellaire : tes entraînements construisent un empire" hidden>🚀 Mode spatial <i aria-hidden="true"></i></button>
+        <button class="settings-link" id="settingsBtn">⚙ Réglages</button>
         <button class="friends-link" id="friendsBtn">👥 Amis <span id="socialStatus" class="social-status"></span></button>
         <button class="badges-link" id="badgesBtn">🏅 Badges <b id="badgeCount">0 / 0</b> →</button>
       </div>
@@ -496,11 +667,19 @@
     <section class="streak" id="streak">
       <div class="flame">🔥</div>
       <div>
-        <div><b id="streakNum">0</b> <span class="label" id="streakLabel">jour d'affilée</span></div>
+        <div><b id="streakNum">0</b> <span class="label" id="streakLabel">séance d'affilée</span></div>
         <p id="streakMsg"></p>
       </div>
       <div class="streak-badges" id="globalBadges"></div>
     </section>
+
+    <button class="game-banner" id="gameBanner" hidden></button>
+
+    <button class="warm-banner" id="warmBanner" hidden>
+      <span class="ic">♨️</span>
+      <span class="txt"><b>Échauffement</b><small id="warmBannerInfo"></small></span>
+      <span class="state" id="warmBannerState"></span>
+    </button>
 
     <div class="ex-list" id="exList"></div>
 
@@ -540,6 +719,16 @@
     <div id="bgGroups"></div>
   </div>
 
+  <!-- ===================== BASE STELLAIRE (rendue par game.js) ===================== -->
+  <div id="baseView" hidden>
+    <div class="topbar">
+      <button id="baseBack" class="btn-ghost">← Accueil</button>
+      <h1>Ma base</h1>
+      <span style="width:96px"></span>
+    </div>
+    <div id="baseRoot"></div>
+  </div>
+
   <!-- ===================== PAGE AMIS (rendue par social.js) ===================== -->
   <div id="friendsView" hidden>
     <div class="topbar">
@@ -550,22 +739,101 @@
     <div id="friendsRoot"></div>
   </div>
 
+  <!-- ===================== PAGE ÉCHAUFFEMENT (mouvements dans warmup.js) ===================== -->
+  <div id="warmView" hidden>
+    <div class="topbar">
+      <button id="warmBack" class="btn-ghost">← Accueil</button>
+      <h1>Échauffement</h1>
+      <span style="width:96px"></span>
+    </div>
+
+    <section class="card session" id="warmIntro">
+      <div class="kicker">Facultatif · avant ta séance</div>
+      <p class="coach" id="warmIntroText"></p>
+      <div class="actions"><button class="btn-go" id="warmStart">Commencer ▶</button></div>
+      <ol class="warm-list" id="warmList"></ol>
+    </section>
+
+    <section class="card session" id="warmRun" hidden>
+      <div class="kicker" id="warmStep"></div>
+      <div class="warm-dots" id="warmDots" aria-hidden="true"></div>
+      <div class="stage warm-stage" id="warmStage">
+        <div class="warm-fig" id="warmFig"></div>
+        <div class="ring">
+          <svg viewBox="0 0 200 200" aria-hidden="true">
+            <circle class="bg" cx="100" cy="100" r="90"></circle>
+            <circle class="fg" id="warmRingFg" cx="100" cy="100" r="90"></circle>
+          </svg>
+          <div class="center">
+            <div class="kicker" id="warmPhase"></div>
+            <div class="time" id="warmTime"></div>
+          </div>
+        </div>
+      </div>
+      <h2 class="warm-name" id="warmName" aria-live="polite"></h2>
+      <p class="coach" id="warmTip"></p>
+      <div class="warm-zones" id="warmZones"></div>
+      <div class="actions">
+        <button class="btn-skip" id="warmPause">⏸ Pause</button>
+        <button class="btn-ghost" id="warmSkip">Passer ⏭</button>
+        <button class="btn-link" id="warmStop">Terminer</button>
+      </div>
+      <div class="hint" id="warmNext"></div>
+    </section>
+
+    <section class="card recap" id="warmRecap" hidden>
+      <div class="kicker" id="warmRecapKicker"></div>
+      <h2 id="warmRecapMsg"></h2>
+      <div class="stats3">
+        <div><b id="warmSumMoves">0</b><span>mouvements faits</span></div>
+        <div><b id="warmSumTime">0:00</b><span>durée</span></div>
+      </div>
+      <div class="new-badges" id="warmBadgesWrap" hidden>
+        <div class="kicker">Badges débloqués</div>
+        <div class="badges" id="warmBadges"></div>
+      </div>
+      <div class="streak-line" id="warmStreak"></div>
+      <div id="warmRecapGame"></div>
+      <div id="warmRecapSocial"></div>
+      <div class="actions">
+        <button class="btn-go" id="warmDone">Choisir un exercice</button>
+        <button class="btn-ghost" id="warmAgain">Recommencer</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- ===================== PAGE RÉGLAGES ===================== -->
+  <div id="settingsView" hidden>
+    <div class="topbar">
+      <button id="settingsBack" class="btn-ghost">← Accueil</button>
+      <h1>Réglages</h1>
+      <span style="width:96px"></span>
+    </div>
+    <div class="set-intro">
+      <p>Enregistrés automatiquement, propres à ce navigateur.</p>
+      <button class="btn-link btn-danger" id="resetAll">Tout réinitialiser</button>
+    </div>
+    <div id="settingsRoot"></div>
+  </div>
+
   <!-- ===================== PAGE EXERCICE ===================== -->
   <div id="exView" hidden>
     <div class="topbar">
       <button id="backBtn" class="btn-ghost">← Accueil</button>
       <h1 id="exTitle">Exercice</h1>
-      <span style="width:96px"></span>
+      <button class="btn-link" id="exSettingsBtn" style="min-width:96px">⚙ Réglages</button>
     </div>
 
-    <details class="settings" id="settings">
-      <summary>⚙ Réglages de l'exercice</summary>
-      <div class="row">
-        <label><span id="lblStart">Reps série 1</span> <input type="number" id="exStart" min="1" step="1"></label>
-        <label><span id="lblInc">+ par série</span> <input type="number" id="exInc" min="0" step="1"></label>
-        <label>Pause (secondes) <input type="number" id="exRest" min="5" step="5"></label>
+    <div class="ex-progress" id="exProgress"></div>
+
+    <!-- La position à prendre (dessins : demos.js) -->
+    <section class="card demo-card" id="exDemo" hidden>
+      <h2>La position</h2>
+      <div class="demo">
+        <div class="demo-main" id="demoMain"></div>
+        <ol class="demo-steps" id="demoSteps"></ol>
       </div>
-    </details>
+    </section>
 
     <!-- Séance en cours -->
     <section class="card session" id="sessionCard">
@@ -630,6 +898,7 @@
         <button class="btn-link" id="sumBadgesLink">Voir tous les badges →</button>
       </div>
       <div class="streak-line" id="sumStreak"></div>
+      <div id="recapGame"></div>
       <div id="recapSocial"></div>
       <div class="actions">
         <button class="btn-go" id="newSession">Nouvelle séance</button>
@@ -647,6 +916,12 @@
 <!-- Mode en ligne (facultatif) : sans ces fichiers, l'app marche en local comme avant -->
 <script src="config.js"></script>
 <script src="social.js"></script>
+<script src="figures.js"></script>
+<script src="warmup.js"></script>
+<script src="demos.js"></script>
+<!-- Mode « Base stellaire » (facultatif) -->
+<script src="game-art.js"></script>
+<script src="game.js"></script>
 
 <script>
 (() => {
@@ -681,22 +956,107 @@
 
   // type 'reps'  : on compte des répétitions (unit = nom au singulier, ex. « traction »)
   // type 'timed' : on tient une durée en secondes (start/inc en s), avec `prep` s de préparation
+  // group : section de l'accueil (GROUPS) · units : pluriel irrégulier · zone / how : partie du corps
+  // et consigne · tips : encouragements propres · stars : cumul requis pour chacune des 5 étoiles
+  // Exercices tenus : textes (par défaut ceux d'une suspension à la barre, voir HANG)
+  const HANG = {
+    held: 'suspendu', heldNoun: 'de suspension', ready: 'te suspendre', drop: 'Lâché ✋',
+    prepMsg: 'Mets-toi en place, mains sur la barre…', holdMsg: 'Tiens bon ! Épaules engagées, respire calmement.',
+  };
+  const FLOOR_SIT = {
+    held: 'tenu', heldNoun: 'de maintien', ready: 'te mettre en place', drop: 'J\'arrête ✋',
+    prepMsg: 'Mets-toi en place, mains au sol près des hanches…', holdMsg: 'Tiens bon ! Repousse le sol, épaules basses.',
+  };
+  const STRETCH = {
+    group: 'stretch', type: 'timed', unit: 'seconde', start: 30, inc: 0, rest: 15, prep: 5,
+    stars: [120, 600, 1800, 3600, 7200],
+    held: 'étiré', heldNoun: 'd\'étirement', ready: 'te placer', drop: 'J\'arrête ✋',
+    prepMsg: 'Installe-toi dans la position…', holdMsg: 'Respire lentement, sans jamais forcer jusqu\'à la douleur.',
+  };
+  const GROUPS = [['force', 'Force'], ['learn', 'Apprendre le L-sit'], ['stretch', 'Étirements']];
   const DEFAULT_EX = [
-    { id: 'tractions', name: 'Tractions', type: 'reps', unit: 'traction', start: 1, inc: 1, rest: 90 },
-    { id: 'pompes', name: 'Pompes', type: 'reps', unit: 'pompe', start: 10, inc: 0, rest: 90 },
-    { id: 'deadhang', name: 'Dead hang', type: 'timed', unit: 'seconde', start: 20, inc: 10, rest: 90, prep: 5 },
-    { id: 'lsit', name: 'L-sit hang', type: 'timed', unit: 'seconde', start: 5, inc: 5, rest: 90, prep: 5 },
+    { id: 'tractions', group: 'force', name: 'Tractions', type: 'reps', unit: 'traction', start: 1, inc: 1, rest: 90,
+      zone: 'dos, biceps', stars: [50, 250, 750, 2000, 5000],
+      tips: ['Chaque traction compte.', 'Pense à bien descendre bras tendus.', 'Petit à petit, l\'échelle monte.',
+        'Un barreau de plus sur l\'échelle.', 'Contrôle la descente, c\'est là que ça travaille.', 'Menton au-dessus de la barre, à chaque fois.'] },
+    { id: 'pompes', group: 'force', name: 'Pompes', type: 'reps', unit: 'pompe', start: 10, inc: 0, rest: 90,
+      zone: 'pectoraux, triceps', stars: [100, 500, 1500, 3000, 5000],
+      tips: ['Corps aligné de la tête aux talons.', 'Poitrine près du sol, puis bras tendus.'] },
+    { id: 'deadhang', group: 'force', name: 'Dead hang', type: 'timed', unit: 'seconde', start: 20, inc: 10, rest: 90, prep: 5,
+      zone: 'poigne, épaules', stars: [120, 600, 1800, 3600, 7200], ...HANG,
+      tips: ['Secoue les avant-bras pendant la pause.'] },
+    { id: 'lsit', group: 'force', name: 'L-sit hang', type: 'timed', unit: 'seconde', start: 5, inc: 5, rest: 90, prep: 5,
+      zone: 'abdos, hanches', stars: [60, 300, 900, 1800, 3600], ...HANG,
+      tips: ['Gainage serré, jambes immobiles.'] },
+    { id: 'squats', group: 'force', name: 'Squats', type: 'reps', unit: 'squat', start: 15, inc: 0, rest: 90,
+      zone: 'cuisses', stars: [100, 500, 1500, 3000, 5000],
+      how: 'Fesses en arrière, dos droit, talons au sol.',
+      tips: ['Talons collés au sol.', 'Genoux dans l\'axe des pieds.'] },
+    { id: 'dips', group: 'force', name: 'Dips', type: 'reps', unit: 'dip', start: 5, inc: 0, rest: 90,
+      zone: 'triceps · barres parallèles ou chaise', stars: [50, 250, 750, 1500, 3000],
+      how: 'Sur barres parallèles ou une chaise bien stable : descends jusqu\'aux coudes à angle droit, puis tends les bras.',
+      tips: ['Épaules basses, loin des oreilles.', 'Descends en contrôlant.'] },
+    { id: 'piquees', group: 'force', name: 'Pompes piquées', type: 'reps', unit: 'pompe piquée', units: 'pompes piquées', start: 8, inc: 0, rest: 90,
+      zone: 'épaules', stars: [50, 250, 750, 1500, 3000],
+      how: 'Hanches hautes en V renversé : amène le haut de la tête vers le sol, puis repousse.',
+      tips: ['Hanches bien hautes.', 'Le front descend en avant des mains.'] },
+    { id: 'planche', group: 'force', name: 'Planche', type: 'timed', unit: 'seconde', start: 30, inc: 5, rest: 90, prep: 5,
+      zone: 'gainage', stars: [180, 900, 2700, 5400, 10800],
+      how: 'Sur les avant-bras, corps aligné.',
+      held: 'tenu', heldNoun: 'de gainage', ready: 'te mettre en place', drop: 'J\'arrête ✋',
+      prepMsg: 'Mets-toi en place, avant-bras au sol…', holdMsg: 'Tiens bon ! Corps aligné, serre les abdos et les fessiers.',
+      tips: ['Ni les fesses en l\'air, ni le dos creusé.'] },
+    { id: 'pont', group: 'force', name: 'Pont fessier', type: 'reps', unit: 'pont', start: 15, inc: 0, rest: 90,
+      zone: 'fessiers', stars: [100, 500, 1500, 3000, 5000],
+      how: 'Sur le dos, pieds au sol : monte le bassin en serrant les fessiers.',
+      tips: ['Serre les fessiers en haut.', 'Pousse dans les talons.'] },
+    { id: 'tuck', group: 'learn', name: 'Tuck sit au sol', type: 'timed', unit: 'seconde', start: 5, inc: 5, rest: 90, prep: 5,
+      zone: 'étape 1 : genoux groupés', stars: [60, 300, 900, 1800, 3600], ...FLOOR_SIT,
+      how: 'En appui sur les mains, bras tendus, genoux contre la poitrine : décolle les pieds.',
+      tips: ['Remonte les genoux vers la poitrine.', 'Bras verrouillés.'] },
+    { id: 'lsit1', group: 'learn', name: 'L-sit une jambe', type: 'timed', unit: 'seconde', start: 5, inc: 5, rest: 90, prep: 5,
+      zone: 'étape 2 : une jambe tendue', stars: [60, 300, 900, 1800, 3600], ...FLOOR_SIT,
+      how: 'Comme le tuck sit, avec une jambe tendue. Change de jambe à chaque série.',
+      tips: ['Change de jambe à la prochaine série.', 'Pointe le pied de la jambe tendue.'] },
+    { id: 'etir-epaules', name: 'Étirement épaules', ...STRETCH, zone: 'épaules, pectoraux',
+      how: 'Mains jointes dans le dos (ou avant-bras contre un montant) : ouvre la poitrine.',
+      tips: ['Épaules basses, poitrine ouverte.', 'Relâche la nuque.'] },
+    { id: 'etir-ischios', name: 'Étirement ischios', ...STRETCH, zone: 'arrière des cuisses',
+      how: 'Assis, jambes tendues : penche-toi vers l\'avant, dos long.',
+      tips: ['Le dos reste long, sans à-coups.', 'Souffle et laisse-toi descendre.'] },
+    { id: 'etir-hanches', name: 'Étirement hanches', ...STRETCH, zone: 'avant des hanches',
+      how: 'En fente basse, genou arrière au sol : avance le bassin. Change de côté à chaque série.',
+      tips: ['Change de côté à la prochaine série.', 'Buste droit, bassin vers l\'avant.'] },
   ];
+  // Échauffement : activité à part (hors de DEFAULT_EX, pas de réglages ni de carte d'exercice),
+  // mais enregistrée dans l'historique. Mouvements et visuels : warmup.js (facultatif).
+  const WARMUP = { id: 'echauffement', name: 'Échauffement', type: 'warmup', unit: 'échauffement' };
+  const WARMUP_MIN = 10; // mouvements menés au bout pour que l'échauffement soit enregistré
+  const WARM_HASH = '#/echauffement';
+  const isWarmup = h => h.exId === WARMUP.id;
+  const W = () => window.TTWarmup || null;
   // La liste des exercices est fixée par DEFAULT_EX (ordre compris) ; on ne reprend du
   // stockage que les réglages modifiés par l'utilisateur (start, inc, rest, prep).
   // Les exercices enregistrés qui ne sont plus dans DEFAULT_EX (ex. anciens exercices
   // ajoutés à la main) sont ignorés ; leur historique est rattaché par nom dans norm().
   const stored = store.get('tt.exercises', []);
-  const SETTINGS = ['start', 'inc', 'rest', 'prep'];
+  // Réglages modifiables (page Réglages). max / label peuvent dépendre du type d'exercice ;
+  // time = valeur en secondes ; timedOnly = exercices tenus uniquement.
+  const FIELDS = [
+    { key: 'start', min: 1, max: t => (t ? 3600 : 9999), time: t => t, label: t => (t ? 'Durée de la série 1 (s)' : 'Répétitions de la série 1') },
+    { key: 'inc', min: 0, max: () => 999, time: t => t, label: t => (t ? '+ secondes par série' : '+ répétitions par série') },
+    { key: 'sets', min: 0, max: () => 50, time: () => false, label: () => 'Nombre de séries (0 = libre)' },
+    { key: 'rest', min: 1, max: () => 3600, time: () => true, label: () => 'Temps de récup (s)' },
+    { key: 'prep', min: 1, max: () => 60, time: () => true, timedOnly: true, label: () => 'Préparation avant effort (s)' },
+  ];
+  const fieldsOf = e => FIELDS.filter(f => !f.timedOnly || e.type === 'timed');
+  const defaultEx = d => ({ sets: 0, ...d }); // sets : 0 = séries libres
   let exercises = DEFAULT_EX.map(d => {
     const s = Array.isArray(stored) ? stored.find(e => e && e.id === d.id) : null;
-    const ex = { ...d };
-    if (s) for (const k of SETTINGS) if (Number.isFinite(s[k])) ex[k] = s[k];
+    const ex = defaultEx(d);
+    if (s) for (const f of fieldsOf(ex)) {
+      if (Number.isFinite(s[f.key])) ex[f.key] = Math.min(f.max(ex.type === 'timed'), Math.max(f.min, Math.round(s[f.key])));
+    }
     return ex;
   });
   let activeId = store.get('tt.active', exercises[0].id);
@@ -805,7 +1165,7 @@
   }
 
   const saveEx = () => { store.set('tt.exercises', exercises); store.set('tt.active', activeId); };
-  const exById = id => exercises.find(e => e.id === id);
+  const exById = id => (id === WARMUP.id ? WARMUP : exercises.find(e => e.id === id));
   const active = () => exById(activeId);
 
   // ---------- Historique & stats ----------
@@ -832,29 +1192,84 @@
       if (hour >= 22) late++;
       const k = dayStart(h.date);
       if (!days.has(k)) days.set(k, new Set());
-      days.get(k).add(h.exId);
+      if (!isWarmup(h)) days.get(k).add(h.exId); // l'échauffement ne compte pas comme un exercice
     }
     return {
-      total, bestSet, bestSession, sessions: hs.length, last: hs[0] || null, streak: streakDays(),
+      total, bestSet, bestSession, sessions: hs.length, last: hs[0] || null, streak: streak().count,
       longest,                                                     // plus longue séance (s)
       early, late,                                                 // séances avant 8 h / après 22 h
       days: days.size,                                             // jours d'entraînement distincts
       variety: Math.max(0, ...[...days.values()].map(s => s.size)), // max d'exercices différents en un jour
-      tried: new Set(hs.map(h => h.exId)).size,                    // exercices différents essayés
+      tried: new Set(hs.filter(h => !isWarmup(h)).map(h => h.exId)).size, // exercices différents essayés
     };
   }
 
   const dayStart = ts => { const d = new Date(ts); d.setHours(0, 0, 0, 0); return d.getTime(); };
-  const trainedToday = () => history.some(h => dayStart(h.date) === dayStart(Date.now()));
+  const trainedToday = () => history.some(h => !isWarmup(h) && dayStart(h.date) === dayStart(Date.now()));
 
-  // Jours consécutifs avec au moins une séance ; la série court si la dernière est aujourd'hui ou hier.
-  function streakDays() {
-    const days = new Set(history.map(h => dayStart(h.date)));
-    const d = new Date(); d.setHours(0, 0, 0, 0);
-    if (!days.has(d.getTime())) d.setDate(d.getDate() - 1);
-    let n = 0;
-    while (days.has(d.getTime())) { n++; d.setDate(d.getDate() - 1); }
-    return n;
+  // ---------- Série (flamme) ----------
+  // Un jour d'entraînement = un jour avec au moins un exercice (l'échauffement seul ne compte pas).
+  // La série tient si : au plus STREAK_MAX_GAP jours entre deux jours d'entraînement (3 jours de
+  // repos), et au moins STREAK_PER_WEEK jours par semaine (lundi → dimanche ; la semaine où la
+  // série démarre est exemptée). Compteur = nombre de jours d'entraînement de la série.
+  const STREAK_MAX_GAP = 4, STREAK_PER_WEEK = 2;
+  // Calendaire (setDate / arrondi) : un jour de changement d'heure ne dure pas 24 h
+  const addDays = (ts, n) => { const d = new Date(ts); d.setDate(d.getDate() + n); return d.getTime(); };
+  const daysBetween = (a, b) => Math.round((b - a) / 864e5);
+  const monday = ts => addDays(ts, -((new Date(ts).getDay() + 6) % 7)); // ts = début d'un jour
+
+  // dates = horodatages des jours d'entraînement (ordre libre, doublons permis).
+  // Renvoie { count, deadline, weekCount, weekNeeded } : deadline = dernier jour pour la prochaine
+  // séance (null si aucune série), weekNeeded = jours qu'il manque encore cette semaine.
+  function streakInfo(dates, now = Date.now()) {
+    const today = dayStart(now);
+    const days = [...new Set(dates.map(dayStart))].filter(d => d <= today).sort((a, b) => a - b);
+    const perWeek = new Map(); // lundi → nombre de jours d'entraînement
+    for (const d of days) perWeek.set(monday(d), (perWeek.get(monday(d)) || 0) + 1);
+
+    let count = 0, startWeek = null, last = null;
+    // La série qui passait par `last` tient-elle encore au jour d ? (écart + semaines terminées)
+    const holds = d => {
+      if (daysBetween(last, d) > STREAK_MAX_GAP) return false;
+      for (let w = monday(last); w < monday(d); w = addDays(w, 7)) {
+        if (w !== startWeek && (perWeek.get(w) || 0) < STREAK_PER_WEEK) return false;
+      }
+      return true;
+    };
+    for (const d of days) {
+      if (last !== null && holds(d)) count++;
+      else { count = 1; startWeek = monday(d); }
+      last = d;
+    }
+
+    const week = monday(today);
+    const weekCount = perWeek.get(week) || 0;
+    const none = { count: 0, deadline: null, weekCount, weekNeeded: 0 };
+    if (last === null || !holds(today)) return none;
+    const weekNeeded = week === startWeek ? 0 : Math.max(0, STREAK_PER_WEEK - weekCount);
+    // Jours encore disponibles d'ici dimanche (aujourd'hui compris s'il n'est pas déjà validé)
+    const left = 7 - daysBetween(week, today) - (last === today ? 1 : 0);
+    if (weekNeeded > left) return none; // le quota de la semaine n'est plus atteignable
+    let deadline = addDays(last, STREAK_MAX_GAP);
+    if (weekNeeded) deadline = Math.min(deadline, addDays(week, 7 - weekNeeded));
+    return { count, deadline, weekCount, weekNeeded };
+  }
+
+  const exerciseDates = () => history.filter(h => !isWarmup(h)).map(h => h.date);
+  const streak = () => streakInfo(exerciseDates());
+  const streakLabel = n => `${plural(n, 'séance')} d'affilée`;
+
+  // Texte du bandeau d'accueil
+  function streakMessage(s, sessions) {
+    if (!sessions) return 'Lance ta première séance pour allumer la flamme.';
+    if (!s.count) return 'Pas de série en cours : une séance pour repartir ! Ensuite, 2 par semaine et jamais plus de 3 jours de repos.';
+    const done = trainedToday();
+    const wait = daysBetween(dayStart(Date.now()), s.deadline);
+    const when = wait === 1 ? 'demain' : new Date(s.deadline).toLocaleDateString('fr-FR', { weekday: 'long' });
+    const next = wait === 0 ? 'Entraîne-toi aujourd\'hui, dernier délai !'
+      : done ? `Séance du jour validée 💪 Prochaine au plus tard ${when}.`
+      : `Prochaine séance au plus tard ${when}.`;
+    return next + (s.weekNeeded ? ` Cette semaine : ${s.weekCount} / ${STREAK_PER_WEEK}.` : '');
   }
 
   function ago(ts) {
@@ -874,10 +1289,10 @@
     B('s25',   null, '🎖️', 'Assidu·e',        '25 séances',                                  'sessions', 25),
     B('s50',   null, '🏛️', 'Pilier',          '50 séances',                                  'sessions', 50),
     B('s100',  null, '💎', 'Légende',         '100 séances',                                 'sessions', 100),
-    B('st3',   null, '🔥', 'En feu',          '3 jours d\'affilée',                          'streak', 3),
-    B('st7',   null, '☄️', 'Semaine pleine',  '7 jours d\'affilée',                          'streak', 7),
-    B('st14',  null, '⚔️', 'Deux semaines',   '14 jours d\'affilée',                         'streak', 14),
-    B('st30',  null, '🌋', 'Inarrêtable',     '30 jours d\'affilée',                         'streak', 30),
+    B('st3',   null, '🔥', 'En feu',          '3 séances d\'affilée',                        'streak', 3),
+    B('st7',   null, '☄️', 'Bien lancé·e',    '7 séances d\'affilée',                        'streak', 7),
+    B('st14',  null, '⚔️', 'Métronome',       '14 séances d\'affilée',                       'streak', 14),
+    B('st30',  null, '🌋', 'Inarrêtable',     '30 séances d\'affilée',                       'streak', 30),
     B('d30',   null, '📆', 'Un mois de sport', '30 jours d\'entraînement',                   'days', 30),
     B('d100',  null, '🗓️', 'Cent jours',      '100 jours d\'entraînement',                   'days', 100),
     B('early', null, '🌅', 'Lève-tôt',        'Une séance avant 8 h',                        'early', 1),
@@ -886,6 +1301,10 @@
     B('poly3', null, '🎨', 'Polyvalent·e',    '3 exercices différents le même jour',         'variety', 3),
     B('poly4', null, '🧩', 'Grand chelem',    `Les ${exercises.length} exercices le même jour`, 'variety', exercises.length),
     B('long',  null, '⌛', 'Endurance',       'Une séance de 20 min',                        'longest', 1200),
+    // Échauffement
+    B('w1',  'echauffement', '♨️', 'Mise en route',   '1er échauffement',  'sessions', 1),
+    B('w10', 'echauffement', '🌡️', 'Moteur chaud',    '10 échauffements',  'sessions', 10),
+    B('w50', 'echauffement', '🧯', 'Toujours prêt·e', '50 échauffements',  'sessions', 50),
     // Tractions
     B('b5',    'tractions', '💪', 'Série de 5',   '5 tractions d\'affilée',      'bestSet', 5),
     B('b10',   'tractions', '⚡', 'Série de 10',  '10 tractions d\'affilée',     'bestSet', 10),
@@ -926,6 +1345,81 @@
     B('ls60',  'lsit', '⏲️', 'Minute gainée',   '1 min en une séance',     'bestSession', 60),
     B('lt10',  'lsit', '🧘', 'Zen',             '10 min au total',         'total', 600),
     B('lse10', 'lsit', '🎋', 'Discipline',      '10 séances de L-sit',     'sessions', 10),
+    // Squats
+    B('sq25',   'squats', '🦵', 'Série de 25',      '25 squats d\'affilée',     'bestSet', 25),
+    B('sq50',   'squats', '🐎', 'Série de 50',      '50 squats d\'affilée',     'bestSet', 50),
+    B('sqs100', 'squats', '🧨', 'Cent squats',      '100 squats en une séance', 'bestSession', 100),
+    B('sqs200', 'squats', '🌪️', 'Tornade',          '200 squats en une séance', 'bestSession', 200),
+    B('sqt500', 'squats', '🪨', 'Fondations',       '500 squats au total',      'total', 500),
+    B('sqt2k',  'squats', '🐘', 'Piliers',          '2 000 squats au total',    'total', 2000),
+    B('sqt5k',  'squats', '🏟️', 'Colosse',          '5 000 squats au total',    'total', 5000),
+    B('sqse10', 'squats', '🔁', 'Jour des jambes',  '10 séances de squats',     'sessions', 10),
+    // Dips
+    B('di10',   'dips', '🔱', 'Dix dips',        '10 dips d\'affilée',        'bestSet', 10),
+    B('di20',   'dips', '🦅', 'Vingt dips',        '20 dips d\'affilée',        'bestSet', 20),
+    B('dis50',  'dips', '🔨', 'Marteau',            '50 dips en une séance',     'bestSession', 50),
+    B('dis100', 'dips', '⚒️', 'Forge',              '100 dips en une séance',    'bestSession', 100),
+    B('dit250', 'dips', '🪙', 'Premier quart',      '250 dips au total',         'total', 250),
+    B('dit1k',  'dips', '🛠️', 'Mille dips',         '1 000 dips au total',       'total', 1000),
+    B('dit3k',  'dips', '🐂', 'Taureau',            '3 000 dips au total',       'total', 3000),
+    B('dise10', 'dips', '📌', 'Habitude de fer',    '10 séances de dips',        'sessions', 10),
+    // Pompes piquées
+    B('pk10',   'piquees', '🔻', 'Dix piquées',     '10 pompes piquées d\'affilée',     'bestSet', 10),
+    B('pk20',   'piquees', '🦬', 'Vingt piquées',     '20 pompes piquées d\'affilée',     'bestSet', 20),
+    B('pks50',  'piquees', '⛰️', 'Épaules solides', '50 pompes piquées en une séance',  'bestSession', 50),
+    B('pks100', 'piquees', '🗼', 'Tour',            '100 pompes piquées en une séance', 'bestSession', 100),
+    B('pkt250', 'piquees', '🧢', 'Carrure',         '250 pompes piquées au total',      'total', 250),
+    B('pkt1k',  'piquees', '🪖', 'Armure',          '1 000 pompes piquées au total',    'total', 1000),
+    B('pkt3k',  'piquees', '🌍', 'Atlas',           '3 000 pompes piquées au total',    'total', 3000),
+    B('pkse10', 'piquees', '🤸', 'Tête en bas',     '10 séances de pompes piquées',     'sessions', 10),
+    // Planche
+    B('pl45',   'planche', '📏', 'Bien droit',      'Tenir 45 s',          'bestSet', 45),
+    B('pl60',   'planche', '🪵', 'Poutre',          'Tenir 1 min',         'bestSet', 60),
+    B('pl120',  'planche', '🌉', 'Acier trempé',    'Tenir 2 min',         'bestSet', 120),
+    B('pl180',  'planche', '🗽', 'Statue',          'Tenir 3 min',         'bestSet', 180),
+    B('pls5',   'planche', '🕔', 'Cinq minutes',    '5 min en une séance', 'bestSession', 300),
+    B('plt30',  'planche', '🧊', 'Sang-froid',      '30 min au total',     'total', 1800),
+    B('plt60',  'planche', '🪐', 'Heure de gainage', '1 h au total',       'total', 3600),
+    B('plse10', 'planche', '🎖', 'Garde-à-vous',    '10 séances de planche', 'sessions', 10),
+    // Pont fessier
+    B('br30',   'pont', '🍑', 'Série de 30',        '30 ponts d\'affilée',       'bestSet', 30),
+    B('brs100', 'pont', '🌁', 'Cent ponts',         '100 ponts en une séance',   'bestSession', 100),
+    B('brs200', 'pont', '🏗️', 'Bâtisseur',          '200 ponts en une séance',   'bestSession', 200),
+    B('brt500', 'pont', '🧰', 'Solide base',        '500 ponts au total',        'total', 500),
+    B('brt2k',  'pont', '🚂', 'Locomotive',         '2 000 ponts au total',      'total', 2000),
+    B('brt5k',  'pont', '🛕', 'Monument',           '5 000 ponts au total',      'total', 5000),
+    B('brse10', 'pont', '🔄', 'Fidèle au pont',     '10 séances de pont fessier', 'sessions', 10),
+    // Apprendre le L-sit
+    B('tk10', 'tuck', '🌱', 'Décollage', 'Tenir 10 s', 'bestSet', 10),
+    B('tk20', 'tuck', '🌿', 'En lévitation', 'Tenir 20 s', 'bestSet', 20),
+    B('tk30', 'tuck', '🌳', 'Boule compacte', 'Tenir 30 s', 'bestSet', 30),
+    B('tks60', 'tuck', '⌚', 'Minute groupée', '1 min en une séance', 'bestSession', 60),
+    B('tkt5', 'tuck', '🧗‍♂️', 'Apprenti·e', '5 min au total', 'total', 300),
+    B('tkt15', 'tuck', '🏅', 'Persévérance', '15 min au total', 'total', 900),
+    B('tkse10', 'tuck', '🎓', 'Première étape', '10 séances de tuck sit', 'sessions', 10),
+    B('uj10', 'lsit1', '🐣', 'Une jambe', 'Tenir 10 s', 'bestSet', 10),
+    B('uj20', 'lsit1', '🐥', 'Équilibre', 'Tenir 20 s', 'bestSet', 20),
+    B('uj30', 'lsit1', '🦩', 'Flamant', 'Tenir 30 s', 'bestSet', 30),
+    B('ujs60', 'lsit1', '⏰', 'Minute tendue', '1 min en une séance', 'bestSession', 60),
+    B('ujt5', 'lsit1', '🥋', 'En progrès', '5 min au total', 'total', 300),
+    B('ujt15', 'lsit1', '🎗️', 'Presque le L', '15 min au total', 'total', 900),
+    B('ujse10', 'lsit1', '📜', 'Deuxième étape', '10 séances de L-sit une jambe', 'sessions', 10),
+    // Étirements
+    B('es45', 'etir-epaules', '🕊️', 'Épaules libres', 'Tenir 45 s', 'bestSet', 45),
+    B('es60', 'etir-epaules', '🦢', 'Grand ouvert', 'Tenir 1 min', 'bestSet', 60),
+    B('est10', 'etir-epaules', '🎐', 'Souplesse', '10 min au total', 'total', 600),
+    B('est30', 'etir-epaules', '🪽', 'Envergure', '30 min au total', 'total', 1800),
+    B('esse10', 'etir-epaules', '🧣', 'Rituel épaules', '10 séances d\'étirement des épaules', 'sessions', 10),
+    B('ei45', 'etir-ischios', '🙇', 'Mains aux pieds', 'Tenir 45 s', 'bestSet', 45),
+    B('ei60', 'etir-ischios', '🦀', 'Pince', 'Tenir 1 min', 'bestSet', 60),
+    B('eit10', 'etir-ischios', '🪢', 'Élastique', '10 min au total', 'total', 600),
+    B('eit30', 'etir-ischios', '🎍', 'Roseau', '30 min au total', 'total', 1800),
+    B('eise10', 'etir-ischios', '🧵', 'Rituel ischios', '10 séances d\'étirement des ischios', 'sessions', 10),
+    B('eh45', 'etir-hanches', '🐈', 'Hanches souples', 'Tenir 45 s', 'bestSet', 45),
+    B('eh60', 'etir-hanches', '🤺', 'Grande fente', 'Tenir 1 min', 'bestSet', 60),
+    B('eht10', 'etir-hanches', '🌊', 'Fluidité', '10 min au total', 'total', 600),
+    B('eht30', 'etir-hanches', '🦎', 'Sans raideur', '30 min au total', 'total', 1800),
+    B('ehse10', 'etir-hanches', '🪷', 'Rituel hanches', '10 séances d\'étirement des hanches', 'sessions', 10),
   ];
 
   const statsCache = () => { const c = {}; return ex => (c[ex || '*'] ||= computeStats(ex || null)); };
@@ -973,29 +1467,25 @@
   }
 
   // ---------- Messages d'encouragement ----------
+  // Valables pour tous les exercices de force ; chaque exercice ajoute ses `tips`
   const ENCOURAGEMENTS = [
     'Respire profondément, la prochaine arrive.',
-    'Chaque traction compte.',
     'Relâche les épaules, secoue les bras.',
-    'Pense à bien descendre bras tendus.',
-    'Petit à petit, l\'échelle monte.',
     'Une gorgée d\'eau ?',
     'La régularité bat le talent.',
     'Visualise ta prochaine série : propre et contrôlée.',
-    'Un barreau de plus sur l\'échelle.',
-    'Contrôle la descente, c\'est là que ça travaille.',
-    'Gainage serré, jambes immobiles.',
     'La meilleure série, c\'est la prochaine.',
-    'Menton au-dessus de la barre, à chaque fois.',
     'Tu fais ce que la plupart ne font pas.',
     'Les muscles se construisent pendant la récup. Patience.',
   ];
-  let lastEnc = -1;
+  let lastEnc = '';
   function randomEncouragement() {
-    let i;
-    do { i = Math.floor(Math.random() * ENCOURAGEMENTS.length); } while (i === lastEnc && ENCOURAGEMENTS.length > 1);
-    lastEnc = i;
-    return ENCOURAGEMENTS[i];
+    const ex = active();
+    // Étirements : uniquement leurs propres conseils
+    const pool = [...(ex.group === 'stretch' ? [] : ENCOURAGEMENTS), ...(ex.tips || [])];
+    const others = pool.filter(m => m !== lastEnc);
+    lastEnc = others[Math.floor(Math.random() * others.length)] || pool[0];
+    return lastEnc;
   }
 
   // Message affiché pendant la pause qui suit une série (ev = records battus sur cette série)
@@ -1006,7 +1496,8 @@
     if (p.sessions && t <= p.bestSession) {
       const need = p.bestSession - t + 1;
       if (next >= need) return `🎯 La prochaine série te fait battre ton record de séance (${fmtVal(ex, p.bestSession)}) !`;
-      if (need <= next + repsFor(session.set + 1)) return `🎯 Plus que ${fmtVal(ex, need)} pour battre ton record de séance.`;
+      const twoLeft = !ex.sets || ex.sets - session.reps.length >= 2;
+      if (twoLeft && need <= next + repsFor(session.set + 1)) return `🎯 Plus que ${fmtVal(ex, need)} pour battre ton record de séance.`;
     }
     if (p.last && t <= p.last.reps && t + next > p.last.reps) return `📈 La prochaine série et tu dépasses ta dernière séance (${fmtVal(ex, p.last.reps)}).`;
     return randomEncouragement();
@@ -1015,8 +1506,8 @@
   function startMessage() {
     const ex = active(), p = session.prev;
     if (!p.last) return isTimed(ex)
-      ? `Première séance : clique sur Lancer, tu as ${ex.prep || 5} s pour te suspendre. 🚀`
-      : 'Première séance : vas-y à ton rythme, technique propre. 🚀';
+      ? `${ex.how ? ex.how + ' ' : ''}Première séance : clique sur Lancer, tu as ${ex.prep} s pour ${ex.ready}. 🚀`
+      : `${ex.how ? ex.how + ' ' : ''}Première séance : vas-y à ton rythme, technique propre. 🚀`;
     return `Dernière fois : ${fmtVal(ex, p.last.reps)}. Record : ${fmtVal(ex, p.bestSession)}. On fait mieux ?`;
   }
 
@@ -1029,8 +1520,9 @@
     bgNextWrap: $('bgNextWrap'), bgNext: $('bgNext'), bgGroups: $('bgGroups'),
     greet: $('greet'), streak: $('streak'), streakNum: $('streakNum'), streakLabel: $('streakLabel'), streakMsg: $('streakMsg'),
     badgeCount: $('badgeCount'), history: $('history'),
-    exTitle: $('exTitle'), exStart: $('exStart'), exInc: $('exInc'), exRest: $('exRest'),
-    lblStart: $('lblStart'), lblInc: $('lblInc'), hint: $('hint'),
+    exDemo: $('exDemo'), demoMain: $('demoMain'), demoSteps: $('demoSteps'),
+    exProgress: $('exProgress'), exTitle: $('exTitle'), hint: $('hint'),
+    settingsView: $('settingsView'), settingsRoot: $('settingsRoot'),
     sessionCard: $('sessionCard'), stage: $('stage'),
     goPanel: $('goPanel'), goKicker: $('goKicker'), goNum: $('goNum'), goUnit: $('goUnit'),
     restPanel: $('restPanel'), ringFg: $('ringFg'), restLabel: $('restLabel'), time: $('time'), nextLabel: $('nextLabel'),
@@ -1041,16 +1533,29 @@
     sumSets: $('sumSets'), sumBest: $('sumBest'), sumTime: $('sumTime'), sumStairs: $('sumStairs'),
     sumRecords: $('sumRecords'), sumBadgesWrap: $('sumBadgesWrap'), sumBadges: $('sumBadges'), sumStreak: $('sumStreak'),
     toast: $('toast'), confetti: $('confetti'),
+    warmView: $('warmView'), warmBanner: $('warmBanner'), warmBannerInfo: $('warmBannerInfo'), warmBannerState: $('warmBannerState'),
+    warmIntro: $('warmIntro'), warmIntroText: $('warmIntroText'), warmList: $('warmList'),
+    warmRun: $('warmRun'), warmStep: $('warmStep'), warmDots: $('warmDots'), warmStage: $('warmStage'), warmFig: $('warmFig'),
+    warmRingFg: $('warmRingFg'), warmPhase: $('warmPhase'), warmTime: $('warmTime'), warmName: $('warmName'),
+    warmTip: $('warmTip'), warmZones: $('warmZones'), warmPause: $('warmPause'), warmNext: $('warmNext'),
+    warmRecap: $('warmRecap'), warmRecapKicker: $('warmRecapKicker'), warmRecapMsg: $('warmRecapMsg'),
+    warmSumMoves: $('warmSumMoves'), warmSumTime: $('warmSumTime'), warmBadgesWrap: $('warmBadgesWrap'),
+    warmBadges: $('warmBadges'), warmStreak: $('warmStreak'), warmRecapSocial: $('warmRecapSocial'),
     friendsView: $('friendsView'), friendsRoot: $('friendsRoot'), recapSocial: $('recapSocial'), socialStatus: $('socialStatus'),
+    gameToggle: $('gameToggle'), gameBanner: $('gameBanner'), baseView: $('baseView'), baseRoot: $('baseRoot'),
+    recapGame: $('recapGame'), warmRecapGame: $('warmRecapGame'),
   };
 
   const RING_C = 2 * Math.PI * 90;
   el.ringFg.style.strokeDasharray = RING_C;
+  el.warmRingFg.style.strokeDasharray = RING_C;
 
   // ---------- Navigation ----------
-  // Routes par hash : '#/' = accueil, '#/ex/<id>' = page de l'exercice, '#/badges' = badges, '#/amis' = amis.
+  // Routes par hash : '#/' = accueil, '#/ex/<id>' = page de l'exercice, '#/echauffement' = échauffement,
+  // '#/reglages' ou '#/reglages/<id>' = réglages, '#/badges' = badges, '#/amis' = amis,
+  // '#/base' = base stellaire (mode spatial activé seulement).
   // Le bouton « précédent » du navigateur fonctionne donc aussi.
-  let view = null; // 'home' | 'ex' | 'badges' | 'friends'
+  let view = null; // 'home' | 'ex' | 'warm' | 'settings' | 'badges' | 'friends' | 'base'
   const exHash = id => '#/ex/' + encodeURIComponent(id);
 
   function route() {
@@ -1063,9 +1568,19 @@
       location.hash = exHash(activeId); // annule la navigation
       return;
     }
+    const toWarm = location.hash === WARM_HASH && !!W();
+    if (view === 'warm' && toWarm) return;
+    if (view === 'warm' && warmInProgress() && !confirm('Un échauffement est en cours. L\'abandonner ?')) {
+      location.hash = WARM_HASH;
+      return;
+    }
+    const set = location.hash.match(/^#\/reglages(?:\/(.+))?$/);
     if (target) showExercise(target);
+    else if (toWarm) showWarmup();
+    else if (set) showSettings(set[1] && decodeURIComponent(set[1]));
     else if (location.hash === '#/badges') showBadges();
     else if (location.hash === '#/amis') showFriends();
+    else if (location.hash === '#/base' && G()?.isOn()) showBase();
     else showHome();
   }
 
@@ -1075,14 +1590,20 @@
     el.exView.hidden = name !== 'ex';
     el.badgesView.hidden = name !== 'badges';
     el.friendsView.hidden = name !== 'friends';
+    el.warmView.hidden = name !== 'warm';
+    el.settingsView.hidden = name !== 'settings';
+    el.baseView.hidden = name !== 'base';
     window.scrollTo(0, 0);
   }
 
-  // Quitte la page exercice : arrête le timer et efface la séance
+  // Quitte la page exercice ou échauffement : arrête le timer et efface la séance en cours
   function leaveSession() {
     stopTimer();
     stopBlink();
+    stopFigure();
+    stopDemo();
     session = null;
+    warm = null;
   }
 
   function showHome() {
@@ -1107,10 +1628,32 @@
     else el.friendsRoot.innerHTML = '<section class="card"><p class="empty">Le module en ligne (social.js) est introuvable : l\'app fonctionne normalement en local.</p></section>';
   }
 
+  function showBase() {
+    leaveSession();
+    setView('base'); // avant le rendu : game.js se redessine d'après la page affichée
+    G().render(el.baseRoot);
+    document.title = 'Ma base — ' + baseTitle;
+  }
+
+  // Interrupteur et bandeau du mode spatial (accueil)
+  function renderGameHome() {
+    el.gameToggle.hidden = !G();
+    el.gameToggle.setAttribute('aria-checked', String(!!G()?.isOn()));
+    if (G()) G().renderHome(el.gameBanner); else el.gameBanner.hidden = true;
+  }
+
+  function showSettings(id) {
+    leaveSession();
+    renderSettingsPage(id);
+    setView('settings');
+    document.title = 'Réglages — ' + baseTitle;
+    if (id) $('set-' + id)?.scrollIntoView();
+  }
+
   function showExercise(id) {
     activeId = id;
     saveEx();
-    renderSettings();
+    renderExHeader();
     newSession();
     setView('ex');
   }
@@ -1133,6 +1676,7 @@
     session.coach = startMessage();
     el.recap.hidden = true;
     el.sessionCard.hidden = false;
+    renderDemo();
     render();
   }
 
@@ -1164,8 +1708,14 @@
     return ev;
   }
 
+  // Nombre de séries fixé (sets > 0) et atteint
+  const targetReached = () => active().sets > 0 && session.reps.length >= active().sets;
+  // « 2 » ou « 2 / 5 »
+  const setLabel = n => (active().sets ? `${n} / ${active().sets}` : String(n));
+
   function setDone(r) {
     const ev = recordSet(r);
+    if (targetReached()) return saveSession(); // dernière série : pas de pause
     session.coach = coachMessage(ev);
     startRest();
   }
@@ -1186,13 +1736,13 @@
   // --- Exercice chronométré : go → prep (5 s, bip chaque seconde) → hold (bip de départ) → rest
   function startPrep() {
     if (session.startedAt === null) session.startedAt = Date.now();
-    session.coach = 'Mets-toi en place, mains sur la barre…';
-    startCountdown('prep', (active().prep || 5) * 1000);
+    session.coach = active().prepMsg;
+    startCountdown('prep', (active().prep) * 1000);
   }
 
   function startHold() {
     goTone();
-    session.coach = 'Tiens bon ! Épaules engagées, respire calmement.';
+    session.coach = active().holdMsg;
     startCountdown('hold', repsFor(session.set) * 1000);
   }
 
@@ -1318,6 +1868,13 @@
     }
     stopTimer();
     if (!session.reps.length) { session.phase = 'go'; render(); return; }
+    saveSession();
+  }
+
+  // Enregistre les séries validées et affiche le récap
+  function saveSession() {
+    stopBlink();
+    stopTimer();
     session.phase = 'done';
 
     const list = session.reps.slice();
@@ -1331,25 +1888,241 @@
     if (!store.set('tt.history', history)) toast('⚠ Séance NON enregistrée : stockage plein. Exporte tes données !');
 
     const fresh = checkBadges();
+    renderExProgress();
     const p = session.prev;
     const recSession = p.sessions > 0 && total > p.bestSession;
     const recSet = p.sessions > 0 && best > p.bestSet;
     renderRecap({ list, total, best, dur, p, recSession, recSet, fresh });
+    G()?.renderRecap(el.recapGame, entry.id);
     if (recSession || recSet || fresh.length) confetti();
+  }
+
+  // ---------- Échauffement ----------
+  // phase : 'intro' → ('prep' = transition → 'move') × n mouvements → 'done'
+  // Même principe que les séances : timer basé sur l'heure de fin (objet `timer` partagé).
+  let warm = null;     // { phase, i, done: [secondes ou null si passé], startedAt, saved }
+  let figure = null;   // animation en cours (warmup.js)
+
+  const warmInProgress = () => !!warm && (warm.phase === 'prep' || warm.phase === 'move');
+  const warmDoneCount = () => warm.done.filter(Boolean).length;
+  const warmTotalSec = () => W().MOVES.reduce((n, m) => n + m.sec + W().PREP, 0);
+
+  function stopFigure() {
+    figure?.stop();
+    figure = null;
+  }
+
+  function showWarmPanel(panel) {
+    for (const p of [el.warmIntro, el.warmRun, el.warmRecap]) p.hidden = p !== panel;
+  }
+
+  function showWarmup() {
+    leaveSession();
+    warmIntro();
+    setView('warm');
+    document.title = 'Échauffement — ' + baseTitle;
+  }
+
+  function warmIntro() {
+    stopTimer();
+    stopFigure();
+    warm = { phase: 'intro', i: 0, done: [], startedAt: null, saved: false };
+    const { MOVES, drawFigure } = W();
+    el.warmIntroText.textContent =
+      `${MOVES.length} mouvements en ${fmt(warmTotalSec())}, enchaînés automatiquement avec des bips. ` +
+      `Les 2 derniers se font à la barre. Enregistré à partir de ${WARMUP_MIN} mouvements menés au bout.`;
+    el.warmList.innerHTML = '';
+    MOVES.forEach((m, i) => {
+      const li = document.createElement('li');
+      li.innerHTML = `<div></div><b>${i + 1}. ${escapeHtml(m.name)}</b><small>${m.sec} s · ${escapeHtml(m.zones.join(', '))}</small>`;
+      drawFigure(li.firstChild, m, { animate: false });
+      el.warmList.appendChild(li);
+    });
+    showWarmPanel(el.warmIntro);
+  }
+
+  function startWarmup() {
+    if (!warm || warm.phase !== 'intro') return;
+    ensureAudio();
+    warm.startedAt = Date.now();
+    showWarmPanel(el.warmRun);
+    window.scrollTo(0, 0);
+    warmPrepare();
+  }
+
+  // Transition : on montre déjà le mouvement qui arrive
+  function warmPrepare() {
+    const { MOVES, PREP, drawFigure } = W();
+    const m = MOVES[warm.i];
+    stopFigure();
+    figure = drawFigure(el.warmFig, m);
+    el.warmStep.textContent = `Mouvement ${warm.i + 1} / ${MOVES.length}`;
+    el.warmDots.innerHTML = MOVES.map((_, i) =>
+      `<i class="${i === warm.i ? 'cur' : i > warm.i ? '' : warm.done[i] ? 'ok' : 'skip'}"></i>`).join('');
+    el.warmName.textContent = m.name;
+    el.warmTip.textContent = m.tip;
+    el.warmZones.innerHTML = m.zones.map(z => `<span>${escapeHtml(z)}</span>`).join('');
+    const next = MOVES[warm.i + 1];
+    el.warmNext.innerHTML = (next ? `Ensuite : ${escapeHtml(next.name)}${next.bar && !m.bar ? ' (à la barre)' : ''}` : 'Dernier mouvement !') +
+      ' · <kbd>Espace</kbd> pause';
+    warmCountdown('prep', PREP);
+  }
+
+  function warmCountdown(phase, secs) {
+    warm.phase = phase;
+    timer.total = secs * 1000;
+    timer.endAt = Date.now() + timer.total;
+    timer.remainingWhenPaused = null;
+    timer.lastBeep = null;
+    renderWarmPhase();
+    warmRunTick();
+  }
+
+  function warmRunTick() {
+    clearInterval(timer.tick);
+    timer.tick = setInterval(warmUpdate, 200);
+    warmUpdate();
+  }
+
+  function renderWarmPhase() {
+    const paused = timer.remainingWhenPaused !== null;
+    el.warmStage.dataset.phase = warm.phase === 'prep' ? 'prep' : 'hold'; // couleurs : bleu / vert
+    el.warmStage.classList.toggle('paused', paused);
+    el.warmPhase.textContent = paused ? 'En pause' : warm.phase === 'prep' ? 'Prépare-toi' : 'C\'est parti';
+    el.warmPause.textContent = paused ? '▶ Reprendre' : '⏸ Pause';
+    figure?.setPaused(paused);
+  }
+
+  function warmUpdate() {
+    if (!warmInProgress()) return;
+    const r = remaining();
+    const secs = Math.ceil(r / 1000);
+    el.warmTime.textContent = secs;
+    el.warmRingFg.style.strokeDashoffset = RING_C * (1 - r / timer.total);
+    if (timer.remainingWhenPaused === null && secs >= 1 && secs <= 3 && secs !== timer.lastBeep) {
+      timer.lastBeep = secs;
+      tick();
+    }
+    if (r > 0) return;
+    if (warm.phase === 'prep') {
+      goTone();
+      warmCountdown('move', W().MOVES[warm.i].sec);
+    } else {
+      beep();
+      warm.done[warm.i] = W().MOVES[warm.i].sec;
+      warmAdvance();
+    }
+  }
+
+  // Mouvement suivant (ou fin). Un mouvement passé reste à null dans warm.done.
+  function warmAdvance() {
+    stopTimer();
+    warm.done[warm.i] ||= null;
+    warm.i++;
+    if (warm.i >= W().MOVES.length) finishWarmup();
+    else warmPrepare();
+  }
+
+  function warmSkip() {
+    if (!warmInProgress()) return;
+    ensureAudio();
+    warmAdvance();
+  }
+
+  function warmTogglePause() {
+    if (!warmInProgress()) return;
+    ensureAudio();
+    if (timer.remainingWhenPaused === null) {
+      timer.remainingWhenPaused = remaining();
+      clearInterval(timer.tick);
+      renderWarmPhase();
+    } else {
+      timer.endAt = Date.now() + timer.remainingWhenPaused;
+      timer.remainingWhenPaused = null;
+      renderWarmPhase();
+      warmRunTick();
+    }
+  }
+
+  // « Terminer » : s'il n'y a pas assez de mouvements pour enregistrer, on demande confirmation
+  function warmStop() {
+    if (!warmInProgress()) return;
+    const n = warmDoneCount();
+    if (n < WARMUP_MIN) {
+      const left = remaining();
+      if (!confirm(`${n} mouvement${n > 1 ? 's' : ''} sur ${WARMUP_MIN} nécessaires : rien ne sera enregistré. Arrêter quand même ?`)) {
+        if (timer.remainingWhenPaused === null) timer.endAt = Date.now() + left; // le temps de la question ne compte pas
+        return;
+      }
+    }
+    finishWarmup();
+  }
+
+  function finishWarmup() {
+    stopTimer();
+    stopFigure();
+    warm.phase = 'done';
+    const total = W().MOVES.length;
+    const n = warmDoneCount();
+    const dur = Math.round((Date.now() - warm.startedAt) / 1000);
+    let fresh = [], savedId = null;
+    warm.saved = n >= WARMUP_MIN;
+    if (warm.saved) {
+      // reps = 0 : une ancienne version de l'app, qui ne connaît pas l'échauffement, le
+      // rattacherait au premier exercice ; ainsi elle ne gonfle aucun total ni record.
+      const entry = { date: Date.now(), exId: WARMUP.id, name: WARMUP.name, sets: n, reps: 0, best: 0, list: [], dur };
+      entry.id = savedId = sessionId(entry);
+      history.unshift(entry);
+      if (!store.set('tt.history', history)) toast('⚠ Échauffement NON enregistré : stockage plein. Exporte tes données !');
+      fresh = checkBadges();
+    }
+
+    el.warmRecapKicker.textContent = warm.saved ? 'Échauffement terminé' : 'Échauffement interrompu';
+    el.warmRecapMsg.textContent = warm.saved ? 'Te voilà prêt·e ! ♨️' : 'Pas enregistré';
+    el.warmSumMoves.textContent = `${n} / ${total}`;
+    el.warmSumTime.textContent = fmt(dur);
+    el.warmBadgesWrap.hidden = !fresh.length;
+    el.warmBadges.innerHTML = fresh.map(b => badgeHtml(b)).join('');
+    el.warmStreak.textContent = warm.saved
+      ? `🔥 ${streakLabel(streak().count)} · l'échauffement seul n'entretient pas la flamme`
+      : `Il faut au moins ${WARMUP_MIN} mouvements menés au bout.`;
+    if (warm.saved && S()) S().renderRecap(el.warmRecapSocial); else el.warmRecapSocial.innerHTML = '';
+    el.warmRecapGame.innerHTML = '';
+    G()?.renderRecap(el.warmRecapGame, savedId);
+    showWarmPanel(el.warmRecap);
+    window.scrollTo(0, 0);
+    if (fresh.length) confetti();
+  }
+
+  function renderWarmBanner() {
+    el.warmBanner.hidden = !W();
+    if (!W()) return;
+    const today = history.some(h => isWarmup(h) && dayStart(h.date) === dayStart(Date.now()));
+    el.warmBanner.classList.toggle('done', today);
+    el.warmBannerInfo.textContent = `Facultatif · ${fmt(warmTotalSec())} · tout le corps avant ta séance`;
+    el.warmBannerState.textContent = today ? '✓ fait aujourd\'hui' : 'S\'échauffer →';
   }
 
   // ---------- Rendu ----------
   const fmt = s => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
   const plural = (n, w) => `${n} ${w}${n > 1 ? 's' : ''}`;
   const unitOf = e => e.unit || 'répétition';
-  const unitPlural = e => unitOf(e) + 's';
+  const unitPlural = e => e.units || unitOf(e) + 's';
   const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
   const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const isTimed = e => e.type === 'timed';
   // Valeur courte (chiffre seul) : 12 / « 45 s » / « 1:30 »
   const fmtNum = (e, n) => !isTimed(e) ? String(n) : n < 60 ? `${n} s` : fmt(n);
   // Valeur avec unité : « 12 tractions » / « 45 s » / « 1:30 »
-  const fmtVal = (e, n) => isTimed(e) ? fmtNum(e, n) : plural(n, unitOf(e));
+  const fmtVal = (e, n) => isTimed(e) ? fmtNum(e, n) : `${n} ${n > 1 ? unitPlural(e) : unitOf(e)}`;
+  // Cumul lisible : 45 s / 2 min 30 / 1 h 30
+  function fmtCumul(e, n) {
+    if (!isTimed(e)) return n.toLocaleString('fr-FR');
+    const pad = v => String(v).padStart(2, '0');
+    if (n >= 3600) { const m = Math.floor((n % 3600) / 60); return `${Math.floor(n / 3600)} h${m ? ' ' + pad(m) : ''}`; }
+    if (n >= 60) return `${Math.floor(n / 60)} min${n % 60 ? ' ' + pad(n % 60) : ''}`;
+    return `${n} s`;
+  }
 
   function render() {
     const ex = active();
@@ -1367,7 +2140,7 @@
     if (!resting) el.stage.classList.remove('danger');
 
     // Panneau GO
-    el.goKicker.textContent = timed ? `Série ${session.set} · Prêt·e ?` : `Série ${session.set} · GO !`;
+    el.goKicker.textContent = `Série ${setLabel(session.set)} · ${timed ? 'Prêt·e ?' : 'GO !'}`;
     el.goNum.textContent = timed ? fmtNum(ex, reps).replace(' s', '') : reps;
     el.goUnit.textContent = timed ? (reps < 60 ? 'secondes' : 'minutes') : reps > 1 ? unitPlural(ex) : unitOf(ex);
 
@@ -1375,15 +2148,15 @@
     el.restLabel.textContent =
       phase === 'prep' ? 'Prépare-toi' : phase === 'hold' ? 'Tiens bon !' : paused ? 'En pause' : 'Récup';
     el.nextLabel.textContent =
-      phase === 'prep' ? `Série ${session.set} · objectif ${fmtVal(ex, reps)}`
+      phase === 'prep' ? `Série ${setLabel(session.set)} · objectif ${fmtVal(ex, reps)}`
       : phase === 'hold' ? `Objectif ${fmtVal(ex, reps)}`
-      : `Ensuite : série ${session.set} · ${fmtVal(ex, reps)}`;
+      : `Ensuite : série ${setLabel(session.set)} · ${fmtVal(ex, reps)}`;
 
     // Boutons
     const labels = {
-      go: timed ? 'Lancer ▶' : 'Série terminée ✓',
+      go: timed ? 'Lancer ▶' : ex.sets && session.set >= ex.sets ? 'Dernière série ✓' : 'Série terminée ✓',
       prep: 'Annuler le départ',
-      hold: 'Lâché ✋',
+      hold: ex.drop,
       rest: 'Passer la pause ⏭',
     };
     el.mainBtn.textContent = labels[phase] || '';
@@ -1397,12 +2170,14 @@
     el.pauseBtn.textContent = paused ? '▶ Reprendre' : '⏸ Pause';
     el.coach.textContent = session.coach;
     el.hint.innerHTML = timed
-      ? `<kbd>Espace</kbd> action principale · ${ex.prep || 5} s de préparation avec décompte sonore, puis bips de départ et de fin`
-      : `<kbd>Espace</kbd> action principale · après ta dernière série, « Fin de l'exercice » la compte automatiquement`;
+      ? `<kbd>Espace</kbd> action principale · ${ex.prep} s de préparation avec décompte sonore, puis bips de départ et de fin`
+      : `<kbd>Espace</kbd> action principale · ` + (ex.sets
+        ? `la séance se termine après la série ${ex.sets}`
+        : `après ta dernière série, « Fin de l'exercice » la compte automatiquement`);
 
     // Progression
     el.liveTotal.textContent = fmtNum(ex, totalReps());
-    el.liveTotalLabel.textContent = `${timed ? 'suspendu' : unitPlural(ex)} · ${plural(session.reps.length, 'série')}`;
+    el.liveTotalLabel.textContent = `${timed ? ex.held : unitPlural(ex)} · ${plural(session.reps.length, 'série')}`;
     renderStairs(el.stairs, session.reps, reps);
 
     if (counting) update();
@@ -1434,7 +2209,7 @@
 
     const timed = isTimed(ex);
     el.sumReps.textContent = fmtNum(ex, total);
-    el.sumRepsLabel.textContent = timed ? 'de suspension' : total > 1 ? unitPlural(ex) : unitOf(ex);
+    el.sumRepsLabel.textContent = timed ? ex.heldNoun : total > 1 ? unitPlural(ex) : unitOf(ex);
     if (p.last) {
       const d = total - p.last.reps;
       el.sumCompare.hidden = false;
@@ -1458,12 +2233,13 @@
     el.sumBadgesWrap.hidden = !fresh.length;
     el.sumBadges.innerHTML = fresh.map(b => badgeHtml(b)).join('');
 
-    const st = streakDays();
-    el.sumStreak.textContent = `🔥 ${plural(st, 'jour')} d'affilée`;
+    el.sumStreak.textContent = `🔥 ${streakLabel(streak().count)}`;
 
     if (S()) S().renderRecap(el.recapSocial); else el.recapSocial.innerHTML = '';
 
     el.sessionCard.hidden = true;
+    stopDemo();
+    el.exDemo.hidden = true;
     el.recap.hidden = false;
     window.scrollTo(0, 0);
   }
@@ -1472,7 +2248,7 @@
     const t = isTimed(e);
     const s = n => (t ? fmtNum(e, n) : n);
     const prog = e.inc ? `${s(e.start)} → +${s(e.inc)} par série` : `${fmtVal(e, e.start)} par série`;
-    return `${prog} · pause ${fmt(e.rest)}` + (t ? ` · départ dans ${e.prep || 5} s` : '');
+    return (e.sets ? `${plural(e.sets, 'série')} · ` : '') + `${prog} · pause ${fmt(e.rest)}` + (t ? ` · départ dans ${e.prep} s` : '');
   }
 
   function renderHome() {
@@ -1480,21 +2256,29 @@
     const h = new Date().getHours();
     el.greet.textContent = h < 5 ? 'Séance de nuit ?' : h < 12 ? 'Bonjour, on grimpe ?' : h < 18 ? 'On grimpe ?' : 'Bonsoir, on grimpe ?';
 
-    // Streak
-    const s = computeStats(null);
-    const today = trainedToday();
-    el.streak.classList.toggle('cold', s.streak === 0);
-    el.streakNum.textContent = s.streak;
-    el.streakLabel.textContent = s.streak > 1 ? "jours d'affilée" : "jour d'affilée";
-    el.streakMsg.textContent =
-      !s.sessions ? 'Lance ta première séance pour allumer la flamme.'
-      : s.streak === 0 ? 'La flamme s\'est éteinte. Une séance aujourd\'hui pour la rallumer !'
-      : today ? 'Séance du jour validée 💪 Reviens demain pour continuer.'
-      : 'Entraîne-toi aujourd\'hui pour garder ta série !';
+    // Série
+    const s = streak();
+    el.streak.classList.toggle('cold', s.count === 0);
+    el.streakNum.textContent = s.count;
+    el.streakLabel.textContent = s.count > 1 ? "séances d'affilée" : "séance d'affilée";
+    el.streakMsg.textContent = streakMessage(s, history.length);
+
+    renderGameHome();
+    renderWarmBanner();
 
     // Cartes exercice (avec leurs stats : les unités diffèrent d'un exercice à l'autre)
     el.exList.innerHTML = '';
+    let grid = null, group = null;
     for (const e of exercises) {
+      if (e.group !== group) {
+        group = e.group;
+        const title = document.createElement('h2');
+        title.className = 'ex-group';
+        title.textContent = (GROUPS.find(g => g[0] === group) || [group, group])[1];
+        grid = document.createElement('div');
+        grid.className = 'ex-grid';
+        el.exList.append(title, grid);
+      }
       const st = computeStats(e.id);
       const last = st.last;
       const n = v => (st.sessions ? fmtNum(e, v) : '–');
@@ -1502,10 +2286,12 @@
       b.className = 'ex-card';
       b.innerHTML =
         `<div class="name">${escapeHtml(e.name)}</div>` +
+        `<div class="meta">${escapeHtml(cap(e.zone))}</div>` +
+        progressHtml(e, st) +
         `<div class="meta">${escapeHtml(describe(e))}</div>` +
         `<div class="last">${last ? `Dernière séance : <b>${escapeHtml(fmtVal(e, last.reps))}</b> · ${ago(last.date)}` : 'Pas encore de séance'}</div>` +
         `<div class="mini">` +
-          `<div><b>${isTimed(e) ? n(st.total) : st.total.toLocaleString('fr-FR')}</b><span>${isTimed(e) ? 'suspendu au total' : 'au total'}</span></div>` +
+          `<div><b>${isTimed(e) ? n(st.total) : st.total.toLocaleString('fr-FR')}</b><span>${isTimed(e) ? `${e.held} au total` : 'au total'}</span></div>` +
           `<div class="gold"><b>${n(st.bestSet)}</b><span>meilleure série</span></div>` +
           `<div class="gold"><b>${n(st.bestSession)}</b><span>meilleure séance</span></div>` +
           `<div><b>${st.sessions}</b><span>séances</span></div>` +
@@ -1513,7 +2299,7 @@
         exBadgesHtml(e, st) +
         `<span class="cta">C'est parti →</span>`;
       b.addEventListener('click', () => { location.hash = exHash(e.id); });
-      el.exList.appendChild(b);
+      grid.appendChild(b);
     }
 
     // Badges : compteur (lien vers la page) + badges généraux gagnés dans le bandeau streak
@@ -1522,6 +2308,29 @@
 
     S()?.renderHomeStatus(el.socialStatus);
     renderHistory();
+  }
+
+  // 5 étoiles remplies en continu selon le cumul total, et nombre de badges obtenus sur le maximum
+  function progressHtml(e, st) {
+    const steps = e.stars;
+    const fills = steps.map((hi, i) => {
+      const lo = i ? steps[i - 1] : 0;
+      return Math.max(0, Math.min(1, (st.total - lo) / (hi - lo)));
+    });
+    const full = fills.filter(f => f === 1).length;
+    const next = steps[full];
+    const list = BADGES.filter(b => b.ex === e.id);
+    const won = list.filter(b => unlocked[b.id]).length;
+    const label = `${full} étoile${full > 1 ? 's' : ''} sur ${steps.length}`;
+    return `<div class="ex-progress">` +
+      `<span class="stars" role="img" aria-label="${label}" title="${label}">` +
+        fills.map(f => `<span>★<i style="width:${Math.round(f * 100)}%">★</i></span>`).join('') + `</span>` +
+      `<b>🏅 ${won} / ${list.length} badges</b>` +
+      `<span>${next ? `Prochaine étoile : ${escapeHtml(fmtCumul(e, st.total))} / ${escapeHtml(fmtCumul(e, next))}` : 'Toutes les étoiles ! 👑'}</span></div>`;
+  }
+
+  function renderExProgress() {
+    el.exProgress.innerHTML = progressHtml(active(), computeStats(activeId));
   }
 
   // Badges gagnés de l'exercice (pastilles) + le prochain à décrocher
@@ -1559,8 +2368,8 @@
     el.bgNextWrap.hidden = !next.length;
     el.bgNext.innerHTML = next.map(({ b }) => badgeHtml(b, statsFor(b.ex))).join('');
 
-    // Une section par groupe : général puis chaque exercice
-    const groups = [{ id: null, name: 'Général' }, ...exercises.map(e => ({ id: e.id, name: e.name }))];
+    // Une section par groupe : général, échauffement puis chaque exercice
+    const groups = [{ id: null, name: 'Général' }, WARMUP, ...exercises];
     el.bgGroups.innerHTML = groups.map(g => {
       const list = BADGES.filter(b => (b.ex || null) === g.id);
       const won = list.filter(b => unlocked[b.id]).length;
@@ -1570,17 +2379,107 @@
     }).join('');
   }
 
-  function renderSettings() {
+  function renderExHeader() {
     const a = active();
     el.exTitle.textContent = a.name;
     document.title = a.name + ' — ' + baseTitle;
-    const t = isTimed(a);
-    el.lblStart.textContent = t ? 'Durée série 1 (s)' : 'Reps série 1';
-    el.lblInc.textContent = t ? '+ par série (s)' : '+ par série';
-    el.exStart.value = a.start;
-    el.exInc.value = a.inc;
-    el.exRest.value = a.rest;
+    renderExProgress();
   }
+
+  // ---------- Démonstration de la position ----------
+  let demo = null; // animation en cours (figures.js)
+
+  function stopDemo() {
+    demo?.stop();
+    demo = null;
+  }
+
+  // Grand dessin qui passe par les 3 positions + les 3 vignettes (celle montrée est surlignée).
+  // Sans figures.js / demos.js, ou pour un exercice sans dessin, le bloc est masqué.
+  function renderDemo() {
+    stopDemo();
+    const F = window.TTFigures, d = window.TTDemos?.[activeId];
+    el.exDemo.hidden = !(F && d);
+    if (el.exDemo.hidden) return;
+    el.demoSteps.innerHTML = d.steps.map((s, i) =>
+      `<li>${F.svg(s.pose, { props: d.props + s.arrow, label: escapeHtml(s.label) })}<p><b>${i + 1}</b>${escapeHtml(s.label)}</p></li>`).join('');
+    // Avec « réduire les animations », pas de grand dessin ni de surlignage
+    demo = F.drawSteps(el.demoMain, d, n => [...el.demoSteps.children].forEach((li, i) => li.classList.toggle('on', i === n)));
+  }
+
+  // ---------- Page réglages ----------
+  const fieldHint = (f, e) => {
+    const v = e[f.key];
+    if (f.key === 'sets') return v ? '' : 'séries libres';
+    return f.time(isTimed(e)) && v >= 60 ? `= ${fmtCumul({ type: 'timed' }, v)}` : '';
+  };
+
+  function settingsCard(e, open) {
+    const t = isTimed(e);
+    const fields = fieldsOf(e).map(f =>
+      `<label>${escapeHtml(f.label(t))}<input type="number" step="1" min="${f.min}" max="${f.max(t)}" value="${e[f.key]}" ` +
+      `data-ex="${e.id}" data-key="${f.key}"><span class="val">${fieldHint(f, e)}</span></label>`).join('');
+    return `<details class="set-ex" id="set-${e.id}"${open ? ' open' : ''}>` +
+      `<summary><b>${escapeHtml(e.name)}</b><small>${escapeHtml(describe(e))}</small></summary>` +
+      `<div class="set-body"><div class="set-fields">${fields}</div><div class="set-actions">` +
+      `<button class="btn-link" data-reset="${e.id}">↺ Valeurs par défaut</button>` +
+      `<button data-go="${e.id}">Aller à l'exercice →</button></div></div></details>`;
+  }
+
+  function renderSettingsPage(openId) {
+    el.settingsRoot.innerHTML = GROUPS.map(([g, title]) =>
+      `<h2 class="ex-group">${escapeHtml(title)}</h2>` +
+      exercises.filter(e => e.group === g).map(e => settingsCard(e, e.id === openId)).join('')).join('');
+  }
+
+  function resetSettings(e) {
+    const d = defaultEx(DEFAULT_EX.find(x => x.id === e.id));
+    for (const f of fieldsOf(e)) e[f.key] = d[f.key];
+  }
+
+  // Met à jour une carte sans la reconstruire (garde le focus)
+  function refreshSettingsCard(e) {
+    const card = $('set-' + e.id);
+    card.querySelector('summary small').textContent = describe(e);
+    for (const f of fieldsOf(e)) {
+      card.querySelector(`input[data-key="${f.key}"]`).nextElementSibling.textContent = fieldHint(f, e);
+    }
+  }
+
+  // Enregistrement à la saisie ; une valeur hors bornes est ignorée…
+  el.settingsRoot.addEventListener('input', ev => {
+    const { ex: id, key } = ev.target.dataset;
+    const e = exById(id), f = FIELDS.find(x => x.key === key);
+    if (!e || !f) return;
+    const v = ev.target.value.trim() === '' ? NaN : Number(ev.target.value);
+    if (!Number.isInteger(v) || v < f.min || v > f.max(isTimed(e))) return;
+    e[key] = v;
+    saveEx();
+    refreshSettingsCard(e);
+  });
+  // … et le champ revient à la dernière valeur valide quand on le quitte
+  el.settingsRoot.addEventListener('focusout', ev => {
+    const { ex: id, key } = ev.target.dataset;
+    if (id && key) ev.target.value = exById(id)[key];
+  });
+  el.settingsRoot.addEventListener('click', ev => {
+    const b = ev.target.closest('[data-reset], [data-go]');
+    if (!b) return;
+    if (b.dataset.go) { location.hash = exHash(b.dataset.go); return; }
+    const e = exById(b.dataset.reset);
+    resetSettings(e);
+    saveEx();
+    for (const input of $('set-' + e.id).querySelectorAll('input')) input.value = e[input.dataset.key];
+    refreshSettingsCard(e);
+    toast(`↺ ${e.name} : valeurs par défaut`);
+  });
+  $('resetAll').addEventListener('click', () => {
+    if (!confirm('Remettre les réglages de TOUS les exercices à leurs valeurs par défaut ?\n\nTon historique et tes badges ne changent pas.')) return;
+    exercises.forEach(resetSettings);
+    saveEx();
+    renderSettingsPage();
+    toast('↺ Réglages réinitialisés');
+  });
 
   // Regroupe l'historique en sessions d'entraînement : deux séances d'exercice font partie
   // de la même session si la seconde commence moins de SESSION_GAP après la fin de la précédente.
@@ -1616,18 +2515,23 @@
       const diff = Math.round((dayStart(Date.now()) - dayStart(g.end)) / 864e5);
       const date = new Date(g.end).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
       const day = diff === 0 ? "Aujourd'hui" : diff === 1 ? 'Hier' : date.charAt(0).toUpperCase() + date.slice(1);
-      const exCount = new Set(items.map(i => all[i].exId)).size;
-      const sets = items.reduce((n, i) => n + all[i].sets, 0);
+      const work = items.filter(i => !isWarmup(all[i])); // l'échauffement ne compte ni en exercices ni en séries
+      const exCount = new Set(work.map(i => all[i].exId)).size;
+      const sets = work.reduce((n, i) => n + all[i].sets, 0);
       const nRec = items.filter(i => records.has(i)).length;
       const rows = items.map(i => {
         const h = all[i];
         const ex = exById(h.exId) || exercises[0];
+        if (isWarmup(h)) {
+          return `<tr><td class="star"></td><td>${hm(h.date - (h.dur || 0) * 1000)}</td><td>♨️ ${escapeHtml(ex.name)}</td>` +
+            `<td class="num">–</td><td class="num">–</td><td class="num">–</td><td class="num">${fmt(h.dur || 0)}</td></tr>`;
+        }
         return `<tr><td class="star">${records.has(i) ? '★' : ''}</td><td>${hm(h.date - (h.dur || 0) * 1000)}</td><td>${escapeHtml(ex.name)}</td>` +
           `<td class="num">${h.sets}</td><td class="num"><b>${fmtNum(ex, h.reps)}</b></td><td class="num">${fmtNum(ex, h.best)}</td><td class="num">${fmt(h.dur)}</td></tr>`;
       }).join('');
       return `<div class="hist-session"><div class="hist-head"><span class="when">${day}</span>` +
         `<span class="meta">${hm(g.start)} – ${hm(g.end)} · <b>${fmt(Math.round((g.end - g.start) / 1000))}</b> · ` +
-        `${plural(exCount, 'exercice')} · ${plural(sets, 'série')}${nRec ? ` · <span style="color:var(--gold)">★ ${plural(nRec, 'record')}</span>` : ''}</span>` +
+        `${exCount ? `${plural(exCount, 'exercice')} · ${plural(sets, 'série')}` : 'échauffement seul'}${nRec ? ` · <span style="color:var(--gold)">★ ${plural(nRec, 'record')}</span>` : ''}</span>` +
         `${ws ? `<span class="hist-actions">${S().workoutActions(ws[gi])}</span>` : ''}</div>` +
         `<table><thead><tr><th></th><th>Début</th><th>Exercice</th><th class="num">Séries</th><th class="num">Total</th><th class="num">Max</th><th class="num">Durée</th></tr></thead>` +
         `<tbody>${rows}</tbody></table></div>`;
@@ -1764,34 +2668,41 @@
   $('badgesBack').addEventListener('click', () => { location.hash = '#/'; });
   $('friendsBtn').addEventListener('click', () => { location.hash = '#/amis'; });
   $('friendsBack').addEventListener('click', () => { location.hash = '#/'; });
+  $('settingsBtn').addEventListener('click', () => { location.hash = '#/reglages'; });
+  $('settingsBack').addEventListener('click', () => { location.hash = '#/'; });
+  $('baseBack').addEventListener('click', () => { location.hash = '#/'; });
+  el.gameBanner.addEventListener('click', () => { location.hash = '#/base'; });
+  el.gameToggle.addEventListener('click', () => { G().toggle(); renderGameHome(); });
+  $('exSettingsBtn').addEventListener('click', () => { location.hash = '#/reglages/' + encodeURIComponent(activeId); });
   $('sumBadgesLink').addEventListener('click', () => { location.hash = '#/badges'; });
   window.addEventListener('hashchange', route);
+  el.warmBanner.addEventListener('click', () => { location.hash = WARM_HASH; });
+  $('warmBack').addEventListener('click', () => { location.hash = '#/'; });
+  $('warmDone').addEventListener('click', () => { location.hash = '#/'; });
+  $('warmStart').addEventListener('click', startWarmup);
+  $('warmAgain').addEventListener('click', warmIntro);
+  $('warmSkip').addEventListener('click', warmSkip);
+  $('warmStop').addEventListener('click', warmStop);
+  el.warmPause.addEventListener('click', warmTogglePause);
 
   document.addEventListener('keydown', e => {
-    if (view !== 'ex' || e.code !== 'Space') return;
+    if ((view !== 'ex' && view !== 'warm') || e.code !== 'Space') return;
     const tag = document.activeElement && document.activeElement.tagName;
     if (tag === 'INPUT' || tag === 'TEXTAREA') return;
     e.preventDefault();
+    if (view === 'warm') {
+      if (warm.phase === 'intro') startWarmup(); else warmTogglePause();
+      return;
+    }
     if (session.phase === 'done') newSession();
     else mainAction();
   });
-
-  const intField = (input, key, min) => input.addEventListener('input', () => {
-    const v = parseInt(input.value, 10);
-    if (Number.isNaN(v) || v < min) return;
-    active()[key] = v;
-    saveEx();
-    if (session && session.phase !== 'done') render();
-  });
-  intField(el.exStart, 'start', 1);
-  intField(el.exInc, 'inc', 0);
-  intField(el.exRest, 'rest', 1);
 
   // ---------- Export / import / effacement ----------
   function exportData(reason) {
     const data = {
       app: 'timer-traction', schema: SCHEMA, exportedAt: new Date().toISOString(),
-      history, badges: unlocked, exercises,
+      history, badges: unlocked, exercises, game: G()?.snapshot() ?? store.get('tt.game', null),
     };
     const d = new Date(), p = n => String(n).padStart(2, '0');
     const name = `timer-traction-${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${reason ? '-' + reason : ''}.json`;
@@ -1812,7 +2723,7 @@
     const entries = list.map(cleanEntry).filter(Boolean);
     if (list.length && !entries.length) throw new Error('aucune séance au bon format');
     const badges = data && data.badges && typeof data.badges === 'object' && !Array.isArray(data.badges) ? data.badges : {};
-    return { entries, badges, ignored: list.length - entries.length };
+    return { entries, badges, ignored: list.length - entries.length, game: data?.game || null };
   }
 
   function importFile(file) {
@@ -1828,11 +2739,18 @@
         (parsed.ignored ? ` (${parsed.ignored} illisible${parsed.ignored > 1 ? 's' : ''} ignorée${parsed.ignored > 1 ? 's' : ''})` : '') +
         `, dont ${plural(fresh.length, 'nouvelle')} et ${plural(newBadges, 'nouveau badge')}.\n\n` +
         'Les séances sont AJOUTÉES à ton historique (rien n\'est remplacé ni supprimé). Continuer ?';
-      if (!fresh.length && !newBadges) { alert(msg.split('\n')[0] + '\n\nRien de nouveau : tout est déjà dans ton historique.'); return; }
+      // La base stellaire est proposée à part (game.js demande son propre accord)
+      const importGame = () => !!(parsed.game && G()?.restore(parsed.game, 'du fichier'));
+      if (!fresh.length && !newBadges) {
+        if (importGame()) { refresh(); toast('📥 Base stellaire importée'); }
+        else alert(msg.split('\n')[0] + '\n\nRien de nouveau : tout est déjà dans ton historique.');
+        return;
+      }
       if (!confirm(msg)) return;
       const added = mergeHistory(parsed.entries);
       mergeBadges(parsed.badges);
       checkBadges();
+      importGame();
       refresh();
       toast(`📥 ${plural(added, 'séance')} importée${added > 1 ? 's' : ''}`);
     };
@@ -1866,8 +2784,10 @@
   function refresh() {
     if (view === 'home') renderHome();
     else if (view === 'badges') renderBadges();
+    else if (view === 'base') G()?.render(el.baseRoot);
     else if (view === 'friends') S()?.renderFriends(el.friendsRoot);
     else if (view === 'ex' && session && session.phase === 'done') S()?.renderRecap(el.recapSocial);
+    else if (view === 'warm' && warm && warm.phase === 'done' && warm.saved) S()?.renderRecap(el.warmRecapSocial);
   }
 
   // ---------- Entraînements (groupes de séances) ----------
@@ -1878,10 +2798,11 @@
     return groupSessions(all).map(g => {
       const items = g.items.slice().reverse();         // ordre chronologique
       const entries = items.map(i => history[i]);
-      const sets = items.reduce((n, i) => n + (all[i].sets || 0), 0);
+      const work = items.filter(i => !isWarmup(all[i])); // échauffement : ni série ni point en plus
+      const sets = work.reduce((n, i) => n + (all[i].sets || 0), 0);
       const summary = items.map(i => {
         const h = all[i], ex = exById(h.exId) || exercises[0];
-        return `${ex.name} ${fmtVal(ex, h.reps)}`;
+        return isWarmup(h) ? ex.name : `${ex.name} ${fmtVal(ex, h.reps)}`;
       }).join(' · ').slice(0, 300);
       return {
         id: entries[0].id || sessionId(entries[0]),
@@ -1889,18 +2810,19 @@
         sets, points: Math.min(POINTS_MAX, POINTS_PER_WORKOUT + sets),
         summary, entries,
         ids: entries.map(e => e.id || sessionId(e)),
-        exCount: new Set(items.map(i => all[i].exId)).size,
+        exCount: new Set(work.map(i => all[i].exId)).size,
       };
     });
   }
 
   // ---------- Module social (social.js, facultatif) ----------
   const S = () => window.TTSocial || null;
+  const G = () => window.TTGame || null; // mode spatial (game.js, facultatif)
   const TT = {
     get history() { return history; },
     get unlocked() { return unlocked; },
-    BADGES, exercises, exById, fmt, fmtNum, fmtVal, plural, escapeHtml, dayStart,
-    buildWorkouts, mergeHistory, mergeBadges, checkBadges, refresh, toast,
+    BADGES, exercises, exById, fmt, fmtNum, fmtVal, plural, escapeHtml, streakInfo,
+    buildWorkouts, mergeHistory, mergeBadges, checkBadges, refresh, toast, confetti, dayStart,
     view: () => view,
     store,
   };
@@ -1908,6 +2830,7 @@
   // ---------- Init ----------
   checkBadges(); // synchronise les badges avec un historique existant
   showStorageWarning();
+  try { G()?.init(TT); } catch (e) { console.error('[game] init impossible', e); window.TTGame = null; }
   try { S()?.init(TT); } catch (e) { console.error('[social] init impossible', e); }
   route();
 })();

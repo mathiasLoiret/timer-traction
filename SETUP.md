@@ -55,7 +55,7 @@ Pour un usage avec des amis, branche un SMTP gratuit. Exemple avec **Resend** (3
 
 ## 6. Mettre le site en ligne (GitHub Pages)
 
-1. Crée un dépôt sur GitHub et pousses-y le projet : `index.html`, `config.js`, `social.js`, `supabase/`…
+1. Crée un dépôt sur GitHub et pousses-y le projet : `index.html`, `config.js`, `social.js`, `figures.js`, `warmup.js`, `demos.js`, `supabase/`…
    `config.js` ne contient que la clé publique : il peut être public.
 2. Sur GitHub : **Settings → Pages** → *Source : Deploy from a branch* → choisis la branche (`main` ou `master`) et le dossier `/ (root)`, puis **Save**.
 3. Au bout d'une minute, le site est en ligne à l'adresse affichée.
@@ -89,3 +89,11 @@ Pour apparaître au classement, il faut cliquer sur **📤 Envoyer** sur un entr
   ```bash
   curl "https://hbeloyvmukaorsmxzuqn.supabase.co/rest/v1/workouts?select=*" -H "apikey: <clé publishable>"
   ```
+
+## Mise à jour : base stellaire (🚀 Mode spatial)
+
+Le jeu marche en local sans rien faire. Pour que tes amis voient ton empire :
+
+1. Dans Supabase, ouvre **SQL Editor**, colle de nouveau **tout** le contenu de `supabase/schema.sql`, puis **Run** (sans risque : rien n'est effacé).
+2. Mets le site à jour avec les nouveaux fichiers `game.js` et `game-art.js`.
+3. Chacun publie sa base avec « 📤 Publier mon empire », en bas de la page « Ma base ».

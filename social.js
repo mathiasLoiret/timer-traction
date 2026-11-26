@@ -10,7 +10,7 @@
 //  - Les données des autres (pseudos…) sont toujours échappées (escapeHtml).
 //
 // Le cœur (index.html) appelle : init(TT), renderFriends(el), renderRecap(el),
-// renderHomeStatus(el), workoutActions(workout).
+// renderHomeStatus(el), workoutActions(workout). game.js appelle : empireHtml().
 // =====================================================================
 (() => {
   'use strict';
@@ -31,7 +31,10 @@
     loadingSocial: false,
     lastSocialTry: 0,
     pulling: false,
+    myEmpire: undefined,    // ligne `empires` du compte ; null = jamais publié, undefined = inconnu
+    empireBusy: false,
   };
+  const G = () => window.TTGame || null; // mode spatial (game.js, facultatif)
   const log = (tag, ...a) => console.info(`[${tag}]`, ...a);
   const fail = (tag, ...a) => console.error(`[${tag}]`, ...a);
   const esc = s => TT.escapeHtml(s == null ? '' : s);
@@ -107,8 +110,9 @@
       if (new URLSearchParams(location.search).has('code')) history.replaceState(null, '', location.pathname + location.hash);
     }
     if (user) { linkError = null; setPendingEmail(null); }
-    if (!user) { st.profile = null; st.profileChecked = false; rerender(); return; }
+    if (!user) { st.profile = null; st.profileChecked = false; st.myEmpire = undefined; rerender(); return; }
     if (changed) {
+      st.myEmpire = undefined;
       st.profile = null;
       st.profileChecked = false;
       log('auth', 'connecté·e', event);
@@ -130,7 +134,10 @@
     }
     TT.store.set('tt.owner', st.user.id);
     await loadProfile();
-    if (st.profile) await pullAll();
+    if (st.profile) {
+      await pullAll();
+      await loadEmpire();
+    }
     rerender();
   }
 
@@ -275,6 +282,107 @@
     }
   }
 
+  // ---------- Empire (base stellaire) : publication manuelle, comme les entraînements ----------
+  // Table absente (schema.sql pas relancé) ou erreur : tout ce qui touche aux empires est masqué.
+  const EMPIRE_DECLINED = 'tt.empireDeclined'; // date de la sauvegarde que l'on a refusé de reprendre
+
+  async function loadEmpire() {
+    if (!G() || !isMember()) return;
+    try {
+      const { data, error } = await sb.from('empires')
+        .select('state, base_level, fleet_power, planets, hidden, updated_at').eq('user_id', st.user.id).maybeSingle();
+      if (error) throw error;
+      st.myEmpire = data || null;
+      // Navigateur sans progression : proposer de reprendre la base enregistrée sur le compte
+      if (data && !G().hasProgress() && TT.store.get(EMPIRE_DECLINED, null) !== data.updated_at) {
+        if (!G().restore(data.state, 'enregistrée sur ton compte')) TT.store.set(EMPIRE_DECLINED, data.updated_at);
+      }
+    } catch (e) {
+      st.myEmpire = undefined;
+      fail('empire', 'lecture impossible', e);
+    }
+  }
+
+  function empireRow() {
+    const state = G()?.snapshot();
+    if (!state) return null;
+    const s = G().summary(state);
+    return { state, base_level: s.baseLevel, fleet_power: s.power, planets: s.planets };
+  }
+  const empireUpToDate = (a, b) => a.base_level === b.base_level && a.fleet_power === b.fleet_power &&
+    a.planets === b.planets && a.state?.spent?.energy === b.state?.spent?.energy;
+
+  // Bloc affiché en bas de la page base (game.js)
+  function empireHtml() {
+    if (!isMember() || st.myEmpire === undefined) return '';
+    const local = empireRow();
+    if (!local) return '';
+    const mine = st.myEmpire;
+    const retire = '<button class="btn-link" data-tt-act="empire-hide">Retirer</button>';
+    const actions = st.empireBusy ? '<span class="sent">⏳ …</span>'
+      : !mine || mine.hidden ? '<button class="btn-send" data-tt-act="empire-send">📤 Publier mon empire</button>'
+      : !empireUpToDate(local, mine) ? `<button class="btn-send upd" data-tt-act="empire-send">🔄 Mettre à jour</button>${retire}`
+      : `<span class="sent">✓ Empire publié</span>${retire}`;
+    return '<section class="card"><div class="section-head"><h2>👥 Montrer à tes amis</h2><small>niveau de base, flotte et planètes</small></div>' +
+      `<div class="g-empire-actions">${actions}</div></section>`;
+  }
+
+  async function sendEmpire() {
+    const row = empireRow();
+    if (!isMember() || !row || st.empireBusy) return;
+    const old = st.myEmpire;
+    if (old && (old.planets > row.planets || old.base_level > row.base_level) &&
+      !confirm('La base enregistrée sur ton compte est plus avancée que celle de ce navigateur.\n\nLa remplacer quand même ?')) return;
+    await empireWrite(async () => {
+      const full = { user_id: st.user.id, ...row, hidden: false };
+      const { error } = await sb.from('empires').upsert(full, { onConflict: 'user_id' });
+      if (error) throw error;
+      st.myEmpire = full;
+      TT.toast('🚀 Empire publié');
+    }, 'Publication impossible');
+  }
+
+  async function hideEmpire() {
+    if (!isMember() || !st.myEmpire || st.empireBusy) return;
+    if (!confirm('Retirer ton empire de la page Amis ?\n\nTa base reste intacte, et tu pourras la republier.')) return;
+    await empireWrite(async () => {
+      const { error } = await sb.from('empires').update({ hidden: true }).eq('user_id', st.user.id);
+      if (error) throw error;
+      st.myEmpire = { ...st.myEmpire, hidden: true };
+      TT.toast('Empire retiré');
+    }, 'Retrait impossible');
+  }
+
+  async function empireWrite(run, message) {
+    st.empireBusy = true;
+    rerenderActions();
+    try {
+      await run();
+      st.lastSocialTry = 0;
+    } catch (e) {
+      fail('empire', message, e);
+      alert(netMessage(e, message));
+    } finally {
+      st.empireBusy = false;
+      rerenderActions();
+    }
+  }
+
+  function empiresHtml(data, me) {
+    if (!data.empires) return '';
+    const names = new Map((data.leaderboard || []).map(r => [r.user_id, r]));
+    const list = data.empires.filter(e => names.has(e.user_id))
+      .sort((a, b) => b.planets - a.planets || b.fleet_power - a.fleet_power);
+    const head = '<div class="section-head"><h2>🚀 Empires</h2><small>base stellaire</small></div>';
+    if (!list.length) return `<section class="card">${head}<p class="empty">Aucun empire publié. Active le 🚀 Mode spatial sur l'accueil, puis publie ta base.</p></section>`;
+    const rows = list.map((e, i) => {
+      const r = { ...names.get(e.user_id) };
+      return `<tr class="${e.user_id === me ? 'me' : ''}" data-tt-user="${esc(e.user_id)}"><td class="rank">${i + 1}</td><td class="av">${esc(r.avatar || '🙂')}</td>` +
+        `<td>${esc(r.pseudo)}</td><td class="num"><b>${Number(e.planets)}</b></td><td class="num">${Number(e.fleet_power)}</td><td class="num">${Number(e.base_level)}</td></tr>`;
+    }).join('');
+    return `<section class="card">${head}<table class="lb"><thead><tr><th></th><th></th><th>Pseudo</th><th class="num">Planètes</th><th class="num">Puissance</th><th class="num">Base</th></tr></thead><tbody>${rows}</tbody></table></section>`;
+  }
+
   // Boutons d'un entraînement (cartes de l'historique, récap)
   function workoutActions(w) {
     if (!w || !isMember()) return '';
@@ -297,7 +405,7 @@
     if (isMember()) {
       const w = TT.buildWorkouts()[0];
       container.innerHTML = w
-        ? `<div class="recap-social"><p>Ton entraînement : ${TT.plural(w.exCount, 'exercice')} · ${TT.plural(w.sets, 'série')} · <b>${w.points} pts</b></p>` +
+        ? `<div class="recap-social"><p>Ton entraînement : ${w.exCount ? `${TT.plural(w.exCount, 'exercice')} · ${TT.plural(w.sets, 'série')}` : 'échauffement'} · <b>${w.points} pts</b></p>` +
           `<div class="hist-actions">${workoutActions(w)}</div></div>`
         : '';
     } else if (st.lib === 'ready' && !st.user) {
@@ -334,6 +442,8 @@
     const act = t.dataset.ttAct, wid = t.dataset.wid;
     if (act === 'send') sendWorkout(wid);
     else if (act === 'retire') retireWorkout(wid);
+    else if (act === 'empire-send') sendEmpire();
+    else if (act === 'empire-hide') hideEmpire();
     else if (act === 'refresh') loadSocial(true);
     else if (act === 'logout') signOut(false);
   }
@@ -393,13 +503,17 @@
     st.lastSocialTry = Date.now();
     rerenderFriendsOnly();
     try {
-      const [lb, feed] = await Promise.all([
+      const [lb, feed, emp] = await Promise.all([
         sb.from('leaderboard_week').select('*'),
         sb.from('activity_feed').select('*'),
+        // Facultatif : un échec (table absente…) ne doit pas bloquer le classement ni le fil
+        Promise.resolve(sb.from('empires').select('user_id, base_level, fleet_power, planets').eq('hidden', false))
+          .catch(error => ({ error })),
       ]);
       if (lb.error) throw lb.error;
       if (feed.error) throw feed.error;
-      st.social = { at: Date.now(), me: st.user.id, leaderboard: lb.data, feed: feed.data };
+      if (emp.error) fail('social', 'chargement des empires', emp.error);
+      st.social = { at: Date.now(), me: st.user.id, leaderboard: lb.data, feed: feed.data, empires: emp.error ? null : emp.data };
       st.socialErr = null;
       TT.store.set('tt.socialCache', st.social);
     } catch (e) {
@@ -492,6 +606,7 @@
 
   function socialBlocks(data, me) {
     return `<section class="card">${leaderboardHtml(data.leaderboard, me)}</section>` +
+      empiresHtml(data, me) +
       `<section class="card">${feedHtml(data.feed)}</section>`;
   }
 
@@ -598,6 +713,7 @@
       if (err) return formError('frProfileBtn', 'frMsg', err);
       TT.toast(`Bienvenue ${pseudo} ! 🎉`);
       await pullAll();
+      await loadEmpire();
       rerender();
     });
   }
@@ -631,24 +747,24 @@
       ]);
       if (b.error) throw b.error;
       if (w.error) throw w.error;
-      const days = new Set(w.data.map(x => TT.dayStart(Date.parse(x.started_at))));
-      const d = new Date(); d.setHours(0, 0, 0, 0);
-      if (!days.has(d.getTime())) d.setDate(d.getDate() - 1);
-      let streak = 0;
-      while (days.has(d.getTime())) { streak++; d.setDate(d.getDate() - 1); }
+      // Même règle que la flamme ; sets = 0 → échauffement seul, qui n'entretient pas la série
+      const streak = TT.streakInfo(w.data.filter(x => x.sets > 0).map(x => Date.parse(x.started_at))).count;
       const sets = w.data.reduce((n, x) => n + (x.sets || 0), 0);
       const known = b.data.map(x => ({ x, def: badgeById(x.badge_id) }));
       const badges = known.map(({ x, def }) =>
         `<div class="badge on" title="${esc(def ? def.desc : x.badge_id)}"><span class="ic">${esc(def ? def.icon : '🏅')}</span>` +
         `<b>${esc(def ? def.name : x.badge_id)}</b><small>${esc(def ? def.desc : '')}</small>` +
         `<div class="date">✓ ${esc(new Date(x.earned_at).toLocaleDateString('fr-FR'))}</div></div>`).join('');
+      const emp = (st.social?.empires || []).find(e => e.user_id === userId);
+      const empire = emp ? `<p class="empty" style="margin-top:14px">🚀 Empire : ${TT.plural(Number(emp.planets), 'planète')} conquise${emp.planets > 1 ? 's' : ''} · ` +
+        `puissance ${Number(emp.fleet_power)} · base niveau ${Number(emp.base_level)}</p>` : '';
       dlg.innerHTML = head +
         '<div class="mini">' +
           `<div><b>${w.data.length}</b><span>entraînements envoyés</span></div>` +
           `<div><b>${sets}</b><span>séries</span></div>` +
-          `<div class="gold"><b>${streak}</b><span>${streak > 1 ? 'jours d\'affilée' : 'jour d\'affilée'}</span></div>` +
+          `<div class="gold"><b>${streak}</b><span>${streak > 1 ? 'séances d\'affilée' : 'séance d\'affilée'}</span></div>` +
           `<div class="gold"><b>${b.data.length} / ${TT.BADGES.length}</b><span>badges</span></div>` +
-        '</div>' +
+        '</div>' + empire +
         (badges ? `<div class="badges">${badges}</div>` : '<p class="empty" style="margin-top:14px">Pas encore de badge partagé.</p>');
     } catch (e) {
       fail('social', 'fiche ami', e);
@@ -657,5 +773,5 @@
     $('frClose').addEventListener('click', close);
   }
 
-  window.TTSocial = { init, renderFriends, renderRecap, renderHomeStatus, workoutActions };
+  window.TTSocial = { init, renderFriends, renderRecap, renderHomeStatus, workoutActions, empireHtml };
 })();

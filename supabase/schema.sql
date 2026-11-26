@@ -137,6 +137,46 @@ create policy user_badges_insert on public.user_badges for insert to authenticat
 revoke all on public.profiles, public.workouts, public.user_badges from anon;
 revoke delete on public.workouts, public.user_badges, public.profiles from authenticated;
 
+-- ===== EMPIRES (mode « Base stellaire » : un par compte, publié à la demande) =====
+create table if not exists public.empires (
+  user_id      uuid primary key default auth.uid() references auth.users(id) on delete cascade,
+  state        jsonb not null check (pg_column_size(state) < 5000), -- tel qu'en local (restauration)
+  base_level   int not null default 0 check (base_level between 0 and 20),
+  fleet_power  int not null default 0 check (fleet_power between 0 and 1000000),
+  planets      int not null default 0 check (planets between 0 and 10),
+  hidden       boolean not null default false, -- « Retirer » : masqué, jamais de DELETE
+  updated_at   timestamptz not null default now()
+);
+create or replace function public.empires_before_update()
+returns trigger language plpgsql set search_path = public as $$
+begin
+  if new.user_id is distinct from old.user_id then
+    raise exception 'user_id_immutable';
+  end if;
+  new.updated_at := now();
+  return new;
+end;
+$$;
+drop trigger if exists empires_before_update on public.empires;
+create trigger empires_before_update before update on public.empires
+for each row execute function public.empires_before_update();
+
+alter table public.empires enable row level security;
+-- Lecture par les membres (un empire retiré n'est lisible que par son propriétaire)
+drop policy if exists empires_select on public.empires;
+create policy empires_select on public.empires for select to authenticated
+  using ((select public.is_member()) and (not hidden or user_id = (select auth.uid())));
+drop policy if exists empires_insert on public.empires;
+create policy empires_insert on public.empires for insert to authenticated
+  with check (user_id = (select auth.uid()) and (select public.is_member()));
+drop policy if exists empires_update on public.empires;
+create policy empires_update on public.empires for update to authenticated
+  using (user_id = (select auth.uid()))
+  with check (user_id = (select auth.uid()));
+revoke all on public.empires from anon;
+revoke delete, truncate on public.empires from authenticated;
+grant select, insert, update on public.empires to authenticated;
+
 -- ===== VUES (security_invoker : la RLS de l'appelant s'applique) =====
 -- Semaine en cours : du lundi 00:00 heure de Paris au lundi suivant (DST compris).
 create or replace view public.leaderboard_week with (security_invoker = true) as

@@ -54,3 +54,76 @@ Méthode : Chrome headless sur une copie de l'app avec des données injectées (
 - ⏳ **Bascule du lundi 00:00, heure de Paris** : insérer des entraînements datés du dimanche 23:30 et du lundi 00:30 (heure de Paris) et vérifier `leaderboard_week`.
 - ⏳ **Hors ligne** : la dernière version en cache s'affiche avec « ⚠ hors ligne · mis à jour il y a X ».
 - ⏳ **Une séance envoyée apparaît dans le classement et le fil d'un autre compte** après « ↻ Rafraîchir ».
+
+## Échauffement
+
+Exécuté le 26/11/2026, Chrome headless en temps accéléré.
+
+- ✅ **Parcours complet** : 4 min 50, 12/12, une seule entrée (`reps: 0`), badges « Premier pas » et « Mise en route », bandeau « ✓ fait aujourd'hui ».
+- ✅ **Règle des 10/12** : 2 mouvements passés → enregistré ; 3 passés → rien d'enregistré, aucun badge.
+- ✅ **Pause** (Espace et bouton) : le temps et l'animation sont figés.
+- ✅ **Quitter / Terminer** : refus de la confirmation → on reste ; acceptation → rien d'enregistré.
+- ✅ **Avec un exercice** (échauffement puis pompes) : un seul entraînement, « 1 exercice · 1 série ». Les cartes d'exercice ne sont pas touchées par un échauffement.
+- ✅ **Import d'un export contenant l'échauffement** : aucun doublon.
+- ✅ **Sans `warmup.js`** : bandeau masqué, accueil normal, `#/echauffement` renvoie à l'accueil.
+- 🧪 **Envoi** : seul → 0 série, 10 pts, résumé « Échauffement » ; avec 1 série de pompes → 11 pts.
+- ✅ **Visuels** : captures des deux poses des 12 mouvements ; animation vérifiée avec un `requestAnimationFrame` simulé ; deux poses fixes avec « réduire les animations ».
+- ⏳ **À la main** : lisibilité des mouvements en action, volume et rythme des bips, durée de transition suffisante pour rejoindre la barre.
+
+## Série (flamme)
+
+Nouvelle règle : 3 jours de repos au plus, 2 jours d'entraînement par semaine. Exécuté le 26/11/2026.
+
+- ✅ **Calcul** (`streakInfo()` extraite d'`index.html`, Node, heure de Paris) : écarts de 4 et 5 jours, quota hebdomadaire, semaine de démarrage exemptée, dates limites, doublons, changements d'heure et d'année, dates futures.
+- ✅ **Bandeau d'accueil** : aucune séance, série en cours (séance faite ou non), dernier délai, série éteinte.
+- ✅ **Échauffement seul** : n'allume pas la flamme et ne la prolonge pas ; la phrase du récap le dit.
+- ✅ **Badges** : « En feu » se débloque à 3 séances d'affilée ; un badge de série déjà gagné est conservé.
+- 🧪 **Fiche ami** : série calculée avec la même règle, entraînement à 0 série ignoré.
+
+## 14 exercices, étoiles et compteur de badges
+
+Exécuté le 26/11/2026.
+
+- ✅ **Définitions** (Node) : 14 exercices, 124 badges, aucun id ni nom en double, 5 paliers d'étoiles croissants, textes complets pour les exercices tenus.
+- ✅ **Une séance sur chacun des 10 nouveaux exercices** (les tenus arrêtés avant la fin) : unités et pluriels, consigne, textes de préparation et d'effort, récap, étoiles et compteur.
+- ✅ **Étoiles** : vides, à moitié, complètes, avec un historique injecté ; anciens badges conservés.
+- ✅ **Accueil** : trois sections, 2 colonnes en large, 1 en étroit.
+- ✅ **Non-régression** : scénarios d'échauffement (12 mouvements, 4 min 50) et calcul de la série relancés.
+- ⏳ **À la main** : réglages de départ des nouveaux exercices, paliers d'étoiles, lisibilité des 2 nouveaux bonshommes en mouvement.
+
+## Page Réglages et nombre de séries
+
+Exécuté le 26/11/2026, Chrome headless.
+
+- ✅ **Page** : 14 exercices en trois groupes, saisie enregistrée, résumé et durée lisible mis à jour, ouverture directe sur l'exercice depuis sa page.
+- ✅ **Valeurs invalides** (vide, 0, négatif, décimale, trop grande, texte) : ignorées, le champ reprend la dernière valeur valide.
+- ✅ **Réinitialisation** d'un exercice et de tous (refus de la confirmation → rien ne change).
+- ✅ **Anciens réglages** relus ; valeurs hors bornes ramenées dans les bornes.
+- ✅ **Séries fixées** : fin automatique après la dernière (reps, tenu complet, tenu lâché), nombre exact enregistré, arrêt avant la fin possible, mode libre inchangé.
+- ✅ **Lien pendant une séance** : confirmation ; refus → la séance continue.
+- ✅ **Non-régression** : échauffement, nouveaux exercices, calcul de la série.
+
+## Démonstration de la position (3 images)
+
+Exécuté le 26/11/2026, Chrome headless.
+
+- ✅ **14 exercices** : 3 poses chacun, articulations cohérentes, bloc affiché sur chaque page.
+- ✅ **Animation** (avec un `requestAnimationFrame` simulé) : 1 → 2 → 3 puis retour, vignette surlignée ; arrêtée en quittant la page et pendant le récap.
+- ✅ **Réduire les animations** : les 3 vignettes seules. **Sans `figures.js`/`demos.js`** : bloc masqué, la séance fonctionne.
+- ✅ **Place** : en 1280 × 950, le bouton principal reste visible sans défiler (pas sur écran étroit).
+- ✅ **Non-régression** : échauffement (dessin déplacé dans `figures.js`), page Réglages, séries fixées.
+- ⏳ **À la main** : les positions sont-elles compréhensibles en mouvement (surtout dips, tuck sit, L-sit une jambe, étirements) ?
+
+## Base stellaire (mode spatial)
+
+Exécuté le 26/11/2026, Chrome headless en temps accéléré.
+
+- ✅ **Mode éteint** : pas de bandeau, `#/base` renvoie à l'accueil. **Sans `game.js`** : interrupteur masqué, accueil et séances normaux.
+- ✅ **Activation** avec 300 anciennes séances : prime plafonnée (600 / 400 / 200). Éteindre le mode conserve la base.
+- ✅ **Boucle** : séance → gain dans le récap, construction, vaisseaux, attaque (résultat enregistré avant l'animation), export contenant la base.
+- ✅ **`tt.game` corrompu** : valeurs ignorées, solde affiché à 0, pas d'erreur.
+- ✅ **Équilibrage** (simulation Node, entraînements copieux, flamme au maximum, dépenses automatiques) : premier vaisseau au 2e entraînement au plus tard, dernière planète vers 31 semaines.
+- ✅ **Captures** : accueil, page base en large et en étroit, bataille.
+- 🧪 **Empires** : publication, mise à jour, retrait, carte et fiche ami (pseudo échappé), table absente (classement et fil intacts), reprise à la connexion sur un navigateur sans progression.
+- ⏳ **Après avoir relancé `supabase/schema.sql`** : publication réelle, lecture par un second compte, empire retiré invisible pour les autres, écriture sur la ligne d'un autre refusée.
+- ⏳ **À la main** : plaisir de jeu, prix et défenses, animation de bataille.
